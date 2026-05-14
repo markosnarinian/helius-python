@@ -1,0 +1,4 @@
+[*.py]
+indent_style = space
+indent_size = 4
+python_indent_open_paren = 4
