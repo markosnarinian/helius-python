@@ -3,14 +3,7 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field, validate_call
 
-
-class TransactionSignature(BaseModel):
-    signature: str
-    slot: int
-    err: dict | None
-    memo: str | None
-    blockTime: int | None
-    confirmationStatus: str | None
+from helius.models import AccountInfo, TransactionSignature
 
 
 class HeliusClient:
@@ -41,7 +34,7 @@ class HeliusClient:
                 "before": before,
                 "until": until,
                 "commitment": commitment,
-                "min_context_slot": min_context_slot,
+                "minContextSlot": min_context_slot,
             }.items()
             if value is not None
         }
@@ -60,3 +53,43 @@ class HeliusClient:
             signature = TransactionSignature.model_validate(i)
             signatures.append(signature)
         return signatures
+
+    @validate_call
+    def get_account_info(
+        self,
+        public_key: str,
+        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        encoding: Literal["base58", "base64", "base64+zstd", "jsonParsed"] = "base64",
+        data_slice_offset: int | None = None,
+        data_slice_length: int | None = None,
+        min_context_slot: int | None = None,
+    ) -> AccountInfo | None:
+        data_slice = (
+            {"offset": data_slice_offset, "length": data_slice_length}
+            if data_slice_offset is not None and data_slice_length is not None
+            else None
+        )
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "encoding": encoding,
+                "dataSlice": data_slice,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getAccountInfo",
+                "params": [
+                    public_key,
+                    config,
+                ],
+            },
+        )
+        response.raise_for_status()
+        return response.json()["value"]
