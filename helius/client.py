@@ -379,6 +379,21 @@ class HeliusClient:
         result = response.json()["result"]
         return result
 
+    def get_health(self) -> bool:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getHealth",
+            },
+        )
+        response_json = response.json()
+        if "result" in response_json and response_json["result"] == "ok":
+            return True
+        else:
+            return False
+
     @validate_call
     def get_signatures_for_address(
         self,
