@@ -26,7 +26,6 @@ class HeliusClient:
                 raise ValueError("No API key provided.")
             self.api_key = config["HELIUS_API_KEY"]
 
-    @validate_call
     def get_account_info(
         self,
         public_key: str,
@@ -68,7 +67,6 @@ class HeliusClient:
         account_info = AccountInfo.model_validate(result)
         return account_info
 
-    @validate_call
     def get_balance(
         self,
         public_key: str,
@@ -96,7 +94,6 @@ class HeliusClient:
         result = response.json()["result"]
         return result["value"]
 
-    @validate_call
     def get_block(
         self,
         slot: int,
@@ -130,7 +127,6 @@ class HeliusClient:
         block = Block.model_validate(result)
         return block
 
-    @validate_call
     def get_block_commitment(
         self,
         slot: int,
@@ -148,7 +144,6 @@ class HeliusClient:
         block_commitment = BlockCommitment.model_validate(result)
         return block_commitment
 
-    @validate_call
     def get_block_height(
         self,
         commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
@@ -174,7 +169,6 @@ class HeliusClient:
         result = response.json()["result"]
         return result
 
-    @validate_call
     def get_block_production(
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
@@ -222,7 +216,6 @@ class HeliusClient:
         value = result["value"]
         return context, value
 
-    @validate_call
     def get_blocks(
         self,
         start_slot: int,
@@ -250,7 +243,6 @@ class HeliusClient:
         result = response.json()["result"]
         return result
 
-    @validate_call
     def get_blocks_with_limit(
         self,
         start_slot: int,
