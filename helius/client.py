@@ -9,6 +9,7 @@ from helius.models import (
     Block,
     BlockCommitment,
     EpochInfo,
+    EpochSchedule,
     TransactionSignature,
     ClusterNode,
 )
@@ -312,6 +313,19 @@ class HeliusClient:
         result = response.json()["result"]
         epoch_info = EpochInfo.model_validate(result)
         return epoch_info
+
+    def get_epoch_schedule(self) -> EpochSchedule:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getEpochSchedule",
+            },
+        )
+        result = response.json()["result"]
+        epoch_schedule = EpochSchedule.model_validate(result)
+        return epoch_schedule
 
     @validate_call
     def get_signatures_for_address(
