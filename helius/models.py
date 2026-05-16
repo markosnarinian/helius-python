@@ -83,5 +83,14 @@ class EpochSchedule(BaseModel):
     loader_schedule_slot_offset: int
     warmup: bool
     first_normal_epoch: int
-    slots_per_epoch: int
     first_normal_slot: int
+
+
+class InflationGovernor(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    initial: float
+    terminal: float
+    taper: float
+    foundation: float
+    foundation_term: float

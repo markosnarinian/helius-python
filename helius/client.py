@@ -10,6 +10,7 @@ from helius.models import (
     BlockCommitment,
     EpochInfo,
     EpochSchedule,
+    InflationGovernor,
     TransactionSignature,
     ClusterNode,
 )
@@ -418,6 +419,25 @@ class HeliusClient:
         result = response.json()["result"]
         identity = result["identity"]
         return identity
+
+    def get_inflation_governor(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> InflationGovernor:
+        payload = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getInflationGovernor",
+        }
+        if commitment is not None:
+            payload.update({"commitment": commitment})
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json=payload,
+        )
+        result = response.json()["result"]
+        inflation_governor = InflationGovernor.model_validate(result)
+        return inflation_governor
 
     @validate_call
     def get_signatures_for_address(
