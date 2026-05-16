@@ -245,6 +245,28 @@ class HeliusClient:
         return result
 
     @validate_call
+    def get_blocks_with_limit(
+        self,
+        start_slot: int,
+        limit: int,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> list[int]:
+        params: list = [start_slot, limit]
+        if commitment is not None:
+            params.append({"commitment": commitment})
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlockWithLimit",
+                "params": params,
+            },
+        )
+        result = response.json()["result"]
+        return result
+
+    @validate_call
     def get_signatures_for_address(
         self,
         address: str,
