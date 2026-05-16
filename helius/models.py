@@ -4,6 +4,7 @@ from pydantic.alias_generators import to_camel
 
 class TransactionSignature(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     signature: str
     slot: int
     err: dict | None
@@ -14,6 +15,7 @@ class TransactionSignature(BaseModel):
 
 class AccountInfo(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     lamports: int
     owner: str
     data: list | dict | str
@@ -24,6 +26,7 @@ class AccountInfo(BaseModel):
 
 class Rewards(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     pubkey: str
     lamports: int
     post_balance: int
@@ -33,6 +36,7 @@ class Rewards(BaseModel):
 
 class Block(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     blockhash: str
     previous_blockhash: str
     parent_slot: int
@@ -44,5 +48,18 @@ class Block(BaseModel):
 
 class BlockCommitment(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     commitment: list[int] | None
     total_stake: int
+
+
+class ClusterNode(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    pubkey: str
+    gossip: str | None
+    tpu: str | None
+    rpc: str | None
+    version: str | None
+    featureSet: int | None
+    shredVersion: int | None
