@@ -355,6 +355,18 @@ class HeliusClient:
         value = result["value"]
         return context, value
 
+    def get_first_available_block(self) -> int:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getFirstAvailableBlock",
+            },
+        )
+        result = response.json()["result"]
+        return result
+
     @validate_call
     def get_signatures_for_address(
         self,
