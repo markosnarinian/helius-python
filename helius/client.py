@@ -8,6 +8,7 @@ from helius.models import (
     AccountInfo,
     Block,
     BlockCommitment,
+    EpochInfo,
     TransactionSignature,
     ClusterNode,
 )
@@ -285,6 +286,32 @@ class HeliusClient:
         result = response.json()["result"]
         cluster_nodes = [ClusterNode.model_validate(i) for i in result]
         return cluster_nodes
+
+    def get_epoch_info(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ):
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getEpochInfo",
+                "params": [config] if config != {} else [],
+            },
+        )
+        result = response.json()["result"]
+        epoch_info = EpochInfo.model_validate(result)
+        return epoch_info
 
     @validate_call
     def get_signatures_for_address(

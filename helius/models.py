@@ -61,5 +61,16 @@ class ClusterNode(BaseModel):
     tpu: str | None
     rpc: str | None
     version: str | None
-    featureSet: int | None
-    shredVersion: int | None
+    feature_set: int | None
+    shred_version: int | None
+
+
+class EpochInfo(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    absolute_slot: int
+    block_height: int
+    epoch: int
+    slot_index: int
+    slots_in_epoch: int
+    transaction_count: int
