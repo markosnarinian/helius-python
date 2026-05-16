@@ -132,13 +132,39 @@ class HeliusClient:
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
-                "method": "getBlock",
+                "method": "getBlockCommitment",
                 "params": [slot],
             },
         )
         result = response.json()["result"]
         block_commitment = BlockCommitment.model_validate(result)
         return block_commitment
+
+    @validate_call
+    def get_block_height(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        min_context_slot: int | None = None,
+    ) -> int:
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlock",
+                "params": [config],
+            },
+        )
+        result = response.json()["result"]
+        return result
 
     @validate_call
     def get_signatures_for_address(
