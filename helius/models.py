@@ -94,3 +94,12 @@ class InflationGovernor(BaseModel):
     taper: float
     foundation: float
     foundation_term: float
+
+
+class InflationRate(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    total: float
+    validator: float
+    foudnation: float
+    epoch: int

@@ -11,6 +11,7 @@ from helius.models import (
     EpochInfo,
     EpochSchedule,
     InflationGovernor,
+    InflationRate,
     TransactionSignature,
     ClusterNode,
 )
@@ -438,6 +439,19 @@ class HeliusClient:
         result = response.json()["result"]
         inflation_governor = InflationGovernor.model_validate(result)
         return inflation_governor
+
+    def get_inflation_rate(self) -> InflationRate:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getInflationRate",
+            },
+        )
+        result = response.json()["result"]
+        inflation_rate = InflationRate.model_validate(result)
+        return inflation_rate
 
     @validate_call
     def get_signatures_for_address(
