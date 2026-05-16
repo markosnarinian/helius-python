@@ -4,7 +4,7 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field, validate_call
 
-from helius.models import AccountInfo, Block, TransactionSignature
+from helius.models import AccountInfo, Block, BlockCommitment, TransactionSignature
 
 
 class HeliusClient:
@@ -121,6 +121,24 @@ class HeliusClient:
         result = response.json()["result"]
         block = Block.model_validate(result)
         return block
+
+    @validate_call
+    def get_block_commitment(
+        self,
+        slot: int,
+    ) -> BlockCommitment:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlock",
+                "params": [slot],
+            },
+        )
+        result = response.json()["result"]
+        block_commitment = BlockCommitment.model_validate(result)
+        return block_commitment
 
     @validate_call
     def get_signatures_for_address(

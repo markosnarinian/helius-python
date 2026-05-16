@@ -40,3 +40,9 @@ class Block(BaseModel):
     block_time: int | None
     blockHeight: int | None
     rewards: list[Rewards] | None = None
+
+
+class BlockCommitment(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+    commitment: list[int] | None
+    total_stake: int
