@@ -1,19 +1,42 @@
-from pydantic import BaseModel
+from pydantic import AliasGenerator, BaseModel, ConfigDict
+from pydantic.alias_generators import to_camel
 
 
 class TransactionSignature(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
     signature: str
     slot: int
     err: dict | None
     memo: str | None
-    blockTime: int | None
-    confirmationStatus: str | None
+    block_time: int | None
+    confirmation_status: str | None
 
 
 class AccountInfo(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
     lamports: int
     owner: str
     data: list | dict | str
     executable: bool
     rentEpoch: int
-    space: int | None
+    space: int | None = None
+
+
+class Rewards(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+    pubkey: str
+    lamports: int
+    postBalance: int
+    rewardType: str
+    commission: int
+
+
+class Block(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+    blockhash: str
+    previous_blockhash: str
+    parent_slot: int
+    transactions: list[dict]
+    block_time: int | None
+    blockHeight: int | None
+    rewards: list[Rewards] | None = None

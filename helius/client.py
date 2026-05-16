@@ -1,9 +1,10 @@
+from pprint import pprint
 from typing import Annotated, Literal
 import httpx
 from dotenv import dotenv_values
 from pydantic import BaseModel, Field, validate_call
 
-from helius.models import AccountInfo, TransactionSignature
+from helius.models import AccountInfo, Block, TransactionSignature
 
 
 class HeliusClient:
@@ -86,6 +87,40 @@ class HeliusClient:
         response.raise_for_status()
         result = response.json()["result"]
         return result["value"]
+
+    @validate_call
+    def get_block(
+        self,
+        slot: int,
+        commitment: Literal["finalized", "confirmed"] = "finalized",
+        encoding: Literal["jsonParsed", "base58", "base64", "base64+std"] | None = None,
+        transaction_details: Literal["full", "accounts", "signatures", "none"] = "full",
+        rewards: bool = False,
+        max_supported_transcation_version: int | None = None,
+    ) -> Block | None:
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "encoding": encoding,
+                "transactionDetails": transaction_details,
+                "rewards": rewards,
+                "maxSupportedTransactionVersion": max_supported_transcation_version,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlock",
+                "params": [slot, config],
+            },
+        )
+        result = response.json()["result"]
+        block = Block.model_validate(result)
+        return block
 
     @validate_call
     def get_signatures_for_address(
