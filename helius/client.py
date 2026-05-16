@@ -367,7 +367,7 @@ class HeliusClient:
         result = response.json()["result"]
         return result
 
-    def get_genesis_has(self) -> str:
+    def get_genesis_hash(self) -> str:
         response = httpx.post(
             f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
             json={
@@ -405,6 +405,19 @@ class HeliusClient:
         )
         result = response.json()["result"]
         return result
+
+    def get_identity(self) -> str:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getIdentity",
+            },
+        )
+        result = response.json()["result"]
+        identity = result["identity"]
+        return identity
 
     @validate_call
     def get_signatures_for_address(
