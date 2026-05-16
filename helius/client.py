@@ -53,10 +53,7 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getAccountInfo",
-                "params": [
-                    public_key,
-                    config,
-                ],
+                "params": [public_key, config] if config != {} else [public_key],
             },
         )
         response.raise_for_status()
@@ -86,7 +83,7 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBalance",
-                "params": [public_key, config],
+                "params": [public_key, config] if config != {} else [public_key],
             },
         )
         response.raise_for_status()
@@ -120,7 +117,7 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlock",
-                "params": [slot, config],
+                "params": [slot, config] if config != {} else [slot],
             },
         )
         result = response.json()["result"]
@@ -165,7 +162,7 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlock",
-                "params": [config],
+                "params": [config] if config != {} else [],
             },
         )
         result = response.json()["result"]
@@ -211,13 +208,41 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlockProduction",
-                "params": [params],
+                "params": [params] if params != {} else [],
             },
         )
         result = response.json()["result"]
         context = result["context"]
         value = result["value"]
         return context, value
+
+    @validate_call
+    def get_blocks(
+        self,
+        start_slot: int,
+        end_slot: int | None,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> list[int]:
+        """
+        If not provided, the query will return blocks up to the latest confirmed slot from start_slot.
+        The range between start_slot and end_slot (or latest slot if end_slot is omitted) must not exceed 500,000 slots.
+        """
+        params: list = [start_slot]
+        if end_slot is not None:
+            params.append(end_slot)
+        if commitment is not None:
+            params.append({"commitment": commitment})
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlock",
+                "params": params,
+            },
+        )
+        result = response.json()["result"]
+        return result
 
     @validate_call
     def get_signatures_for_address(
@@ -246,7 +271,7 @@ class HeliusClient:
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getSignaturesForAddress",
-                "params": [address, options],
+                "params": [address, options] if options != {} else [address],
             },
         )
         response.raise_for_status()
