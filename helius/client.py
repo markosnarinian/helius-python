@@ -266,6 +266,19 @@ class HeliusClient:
         result = response.json()["result"]
         return result
 
+    def get_block_time(self, slot: int) -> int | None:
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlockTime",
+                "params": [slot],
+            },
+        )
+        result = response.json()["result"]
+        return result
+
     @validate_call
     def get_signatures_for_address(
         self,
