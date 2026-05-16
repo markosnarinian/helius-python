@@ -8,6 +8,7 @@ from helius.models import AccountInfo, Block, BlockCommitment, TransactionSignat
 
 
 class HeliusClient:
+    # BUG: check which endpoints return meaningful data in context
     # TODO: mainnet/devnet via configurable rpc_url
     def __init__(self, api_key: str | None = None) -> None:
         if api_key is not None:
@@ -28,11 +29,14 @@ class HeliusClient:
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
     ) -> AccountInfo | None:
-        data_slice = (
-            {"offset": data_slice_offset, "length": data_slice_length}
-            if data_slice_offset is not None and data_slice_length is not None
-            else None
-        )
+        if data_slice_offset is not None and data_slice_length is not None:
+            data_slice = {"offset": data_slice_offset, "length": data_slice_length}
+        elif data_slice_offset is None and data_slice_length:
+            data_slice = None
+        else:
+            raise ValueError(
+                "Set both data_slice_length and data_slice_offset or neither."
+            )
         config = {
             key: value
             for key, value in {
@@ -56,6 +60,7 @@ class HeliusClient:
             },
         )
         response.raise_for_status()
+        # BUG: handle helius errors that do not show by HTTP response code
         result = response.json()["result"]
         account_info = AccountInfo.model_validate(result)
         return account_info
@@ -165,6 +170,54 @@ class HeliusClient:
         )
         result = response.json()["result"]
         return result
+
+    @validate_call
+    def get_block_production(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        first_slot: int | None = None,
+        last_slot: int | None = None,
+        identity: str | None = None,
+    ) -> tuple[dict, dict]:
+        """
+        At least one of identity or first_slot must be provided.
+        """
+        if (identity is None and first_slot is not None) or (
+            identity is not None and first_slot is None
+        ):
+            raise ValueError("At least one of identity or first_slot must be provided.")
+        if first_slot is None and last_slot is not None:
+            raise ValueError("To set last_slot, first_slot is required.")
+        if first_slot is None and last_slot is None:
+            range = None
+        elif first_slot is not None:
+            range = {"firstSlot": first_slot}
+            if last_slot is not None:
+                range.update({"lastSlot": last_slot})
+        else:
+            raise ValueError("Set both first_slot or last_slot or neither.")
+        params = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "range": range,
+                "identity": identity,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBlockProduction",
+                "params": [params],
+            },
+        )
+        result = response.json()["result"]
+        context = result["context"]
+        value = result["value"]
+        return context, value
 
     @validate_call
     def get_signatures_for_address(
