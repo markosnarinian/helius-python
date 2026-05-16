@@ -8,8 +8,9 @@ from helius.models import AccountInfo, Block, BlockCommitment, TransactionSignat
 
 
 class HeliusClient:
-    # BUG: check which endpoints return meaningful data in context
     # TODO: mainnet/devnet via configurable rpc_url
+    # BUG: check which endpoints return meaningful data in context
+    # BUG: handle helius errors that do not show by HTTP response code
     def __init__(self, api_key: str | None = None) -> None:
         if api_key is not None:
             self.api_key = api_key
@@ -57,7 +58,6 @@ class HeliusClient:
             },
         )
         response.raise_for_status()
-        # BUG: handle helius errors that do not show by HTTP response code
         result = response.json()["result"]
         account_info = AccountInfo.model_validate(result)
         return account_info
