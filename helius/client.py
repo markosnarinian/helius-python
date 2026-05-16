@@ -327,6 +327,34 @@ class HeliusClient:
         epoch_schedule = EpochSchedule.model_validate(result)
         return epoch_schedule
 
+    def get_fee_for_message(
+        self,
+        message: str,
+        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        min_context_slot: int | None = None,
+    ) -> tuple[dict, int | None]:
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getFeeForMessage",
+                "params": [message, config] if config != {} else [message],
+            },
+        )
+        result = response.json()["result"]
+        context = result["context"]
+        value = result["value"]
+        return context, value
+
     @validate_call
     def get_signatures_for_address(
         self,
