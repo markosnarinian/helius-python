@@ -48,11 +48,12 @@ class HeliusClient:
             },
         )
         response.raise_for_status()
-        signatures: list[TransactionSignature] = []
-        for i in response.json()["result"]:
-            signature = TransactionSignature.model_validate(i)
-            signatures.append(signature)
-        return signatures
+        transaction_signatures: list[TransactionSignature] = []
+        result = response.json()["result"]
+        for i in result:
+            transaction_signature = TransactionSignature.model_validate(i)
+            transaction_signatures.append(transaction_signature)
+        return transaction_signatures
 
     @validate_call
     def get_account_info(
@@ -92,4 +93,34 @@ class HeliusClient:
             },
         )
         response.raise_for_status()
-        return response.json()["value"]
+        result = response.json()["result"]
+        account_info = AccountInfo.model_validate(result)
+        return account_info
+
+    @validate_call
+    def get_balance(
+        self,
+        public_key: str,
+        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        min_context_slot: int | None = None,
+    ) -> int:
+        config = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getBalance",
+                "params": [public_key, config],
+            },
+        )
+        response.raise_for_status()
+        result = response.json()["result"]
+        return result["value"]
