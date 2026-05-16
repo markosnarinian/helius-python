@@ -18,44 +18,6 @@ class HeliusClient:
             self.api_key = config["HELIUS_API_KEY"]
 
     @validate_call
-    def get_signatures_for_address(
-        self,
-        address: str,
-        limit: Annotated[int, Field(ge=1, le=1000)] = 1000,
-        before: str | None = None,
-        until: str | None = None,
-        commitment: Literal["finalized", "confirmed"] | None = None,
-        min_context_slot: int | None = None,
-    ) -> list[TransactionSignature]:
-        options = {
-            key: value
-            for key, value in {
-                "limit": limit,
-                "before": before,
-                "until": until,
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
-            json={
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getSignaturesForAddress",
-                "params": [address, options],
-            },
-        )
-        response.raise_for_status()
-        transaction_signatures: list[TransactionSignature] = []
-        result = response.json()["result"]
-        for i in result:
-            transaction_signature = TransactionSignature.model_validate(i)
-            transaction_signatures.append(transaction_signature)
-        return transaction_signatures
-
-    @validate_call
     def get_account_info(
         self,
         public_key: str,
@@ -124,3 +86,41 @@ class HeliusClient:
         response.raise_for_status()
         result = response.json()["result"]
         return result["value"]
+
+    @validate_call
+    def get_signatures_for_address(
+        self,
+        address: str,
+        limit: Annotated[int, Field(ge=1, le=1000)] = 1000,
+        before: str | None = None,
+        until: str | None = None,
+        commitment: Literal["finalized", "confirmed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> list[TransactionSignature]:
+        options = {
+            key: value
+            for key, value in {
+                "limit": limit,
+                "before": before,
+                "until": until,
+                "commitment": commitment,
+                "minContextSlot": min_context_slot,
+            }.items()
+            if value is not None
+        }
+        response = httpx.post(
+            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            json={
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getSignaturesForAddress",
+                "params": [address, options],
+            },
+        )
+        response.raise_for_status()
+        transaction_signatures: list[TransactionSignature] = []
+        result = response.json()["result"]
+        for i in result:
+            transaction_signature = TransactionSignature.model_validate(i)
+            transaction_signatures.append(transaction_signature)
+        return transaction_signatures
