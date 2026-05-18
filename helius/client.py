@@ -3,10 +3,8 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import (
     BaseModel,
-    ConfigDict,
     Field,
     TypeAdapter,
-    field_serializer,
     validate_call,
 )
 
