@@ -60,11 +60,7 @@ class HeliusClient:
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
     ) -> AccountInfo | None:
-        if data_slice_offset is not None and data_slice_length is not None:
-            data_slice = {"offset": data_slice_offset, "length": data_slice_length}
-        elif data_slice_offset is None and data_slice_length:
-            data_slice = None
-        else:
+        if (data_slice_offset is None) != (data_slice_length is None):
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
             )
@@ -73,7 +69,11 @@ class HeliusClient:
             for key, value in {
                 "commitment": commitment,
                 "encoding": encoding,
-                "dataSlice": data_slice,
+                "dataSlice": (
+                    {"offset": data_slice_offset, "length": data_slice_length}
+                    if data_slice_offset is not None and data_slice_length is not None
+                    else None
+                ),
                 "minContextSlot": min_context_slot,
             }.items()
             if value is not None
