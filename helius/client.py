@@ -18,7 +18,6 @@ from helius.models import (
 
 
 class HeliusClient:
-    # TODO: mainnet/devnet via configurable rpc_url
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
     def __init__(
