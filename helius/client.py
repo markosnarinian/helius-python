@@ -19,6 +19,7 @@ from helius.models import (
 class HeliusClient:
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
+    # HACK: build requests with pydantic models and model_dump()
     def __init__(
         self,
         *,
@@ -472,6 +473,8 @@ class HeliusClient:
         result = response.json()["result"]
         inflation_rate = InflationRate.model_validate(result)
         return inflation_rate
+
+    # TODO: getInflationReward
 
     @validate_call
     def get_signatures_for_address(
