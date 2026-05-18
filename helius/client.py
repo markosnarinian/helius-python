@@ -21,14 +21,16 @@ class HeliusClient:
     # TODO: mainnet/devnet via configurable rpc_url
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
-    def __init__(self, api_key: str | None = None) -> None:
-        if api_key is not None:
-            self.api_key = api_key
-        else:
-            config = dotenv_values()
-            if "HELIUS_API_KEY" not in config or config["HELIUS_API_KEY"] is None:
-                raise ValueError("No API key provided.")
-            self.api_key = config["HELIUS_API_KEY"]
+    def __init__(
+        self,
+        *,
+        base_url: str = "https://mainnet.helius-rpc.com",
+        api_key: str | None = None,
+    ) -> None:
+        self.base_url = base_url
+        self.api_key = api_key or dotenv_values().get("HELIUS_API_KEY")
+        if not self.api_key:
+            raise ValueError("No API key provided.")
 
     def get_account_info(
         self,
@@ -58,7 +60,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -86,7 +89,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -119,7 +123,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -136,7 +141,8 @@ class HeliusClient:
         slot: int,
     ) -> BlockCommitment:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -162,7 +168,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -207,7 +214,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -236,7 +244,8 @@ class HeliusClient:
         if commitment is not None:
             params.append({"commitment": commitment})
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -257,7 +266,8 @@ class HeliusClient:
         if commitment is not None:
             params.append({"commitment": commitment})
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -270,7 +280,8 @@ class HeliusClient:
 
     def get_block_time(self, slot: int) -> int | None:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -283,7 +294,8 @@ class HeliusClient:
 
     def get_cluster_nodes(self) -> list[ClusterNode]:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={"jsonrpc": "2.0", "id": 1, "method": "getClusterNodes"},
         )
         result = response.json()["result"]
@@ -304,7 +316,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -318,7 +331,8 @@ class HeliusClient:
 
     def get_epoch_schedule(self) -> EpochSchedule:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -344,7 +358,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -359,7 +374,8 @@ class HeliusClient:
 
     def get_first_available_block(self) -> int:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -371,7 +387,8 @@ class HeliusClient:
 
     def get_genesis_hash(self) -> str:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -383,7 +400,8 @@ class HeliusClient:
 
     def get_health(self) -> bool:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -398,7 +416,8 @@ class HeliusClient:
 
     def get_highest_snapshot_slot(self) -> dict:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -410,7 +429,8 @@ class HeliusClient:
 
     def get_identity(self) -> str:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -433,7 +453,8 @@ class HeliusClient:
         if commitment is not None:
             payload.update({"commitment": commitment})
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json=payload,
         )
         result = response.json()["result"]
@@ -442,7 +463,8 @@ class HeliusClient:
 
     def get_inflation_rate(self) -> InflationRate:
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -475,7 +497,8 @@ class HeliusClient:
             if value is not None
         }
         response = httpx.post(
-            f"https://mainnet.helius-rpc.com/?api-key={self.api_key}",
+            self.base_url,
+            params={"api-key": self.api_key},
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
