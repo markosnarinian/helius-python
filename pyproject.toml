@@ -1,2 +1,5 @@
 [tool.basedpyright]
 typeCheckingMode = "basic"
+
+[tool.isort]
+profile = "black"
