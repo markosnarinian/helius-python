@@ -103,3 +103,11 @@ class InflationRate(BaseModel):
     validator: float
     foudnation: float
     epoch: int
+
+
+# TODO: consider creating an account details composite model
+class LargestAccount(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    address: str
+    lamports: int

@@ -1,7 +1,7 @@
 from typing import Annotated, Literal
 import httpx
 from dotenv import dotenv_values
-from pydantic import Field, validate_call
+from pydantic import Field, TypeAdapter, validate_call
 
 from helius.models import (
     AccountInfo,
@@ -11,6 +11,7 @@ from helius.models import (
     EpochSchedule,
     InflationGovernor,
     InflationRate,
+    LargestAccount,
     TransactionSignature,
     ClusterNode,
 )
@@ -298,7 +299,8 @@ class HeliusClient:
             json={"jsonrpc": "2.0", "id": 1, "method": "getClusterNodes"},
         )
         result = response.json()["result"]
-        cluster_nodes = [ClusterNode.model_validate(i) for i in result]
+        ta = TypeAdapter(list[ClusterNode])
+        cluster_nodes = ta.validate_python(result)
         return cluster_nodes
 
     def get_epoch_info(
@@ -476,6 +478,40 @@ class HeliusClient:
 
     # TODO: getInflationReward
 
+    def get_largest_accounts(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        filter: Literal["circulating", "nonCirculating"] | None = None,
+    ) -> list[LargestAccount]:
+        options = {
+            key: value
+            for key, value in {
+                "commitment": commitment,
+                "filter": filter,
+            }.items()
+            if value is not None
+        }
+        request_json = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getLargestAccounts",
+            "params": [
+                {"filter": "circulating"},
+            ],
+        }
+        if options != {}:
+            request_json.update({"params": [options]})
+        response = httpx.post(
+            self.base_url,
+            params={"api-key": self.api_key},
+            json=request_json,
+        )
+        result = response.json()["result"]
+        value = result["value"]
+        ta = TypeAdapter(list[LargestAccount])
+        largest_accounts = ta.validate_python(value)
+        return largest_accounts
+
     @validate_call
     def get_signatures_for_address(
         self,
@@ -510,7 +546,6 @@ class HeliusClient:
         response.raise_for_status()
         transaction_signatures: list[TransactionSignature] = []
         result = response.json()["result"]
-        for i in result:
-            transaction_signature = TransactionSignature.model_validate(i)
-            transaction_signatures.append(transaction_signature)
+        ta = TypeAdapter(list[TransactionSignature])
+        transaction_signatures = ta.validate_python(result)
         return transaction_signatures
