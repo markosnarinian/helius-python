@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 import httpx
 from dotenv import dotenv_values
 from pydantic import (
@@ -118,7 +118,6 @@ class HeliusClient:
                 "params": [public_key, config] if config != {} else [public_key],
             }
         )
-        response = self._send(request)
         return response["result"]["value"]
 
     def get_block(
