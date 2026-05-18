@@ -1,24 +1,20 @@
 from typing import Annotated, Any, Literal
+
 import httpx
 from dotenv import dotenv_values
-from pydantic import (
-    BaseModel,
-    Field,
-    TypeAdapter,
-    validate_call,
-)
+from pydantic import BaseModel, ConfigDict, Field, TypeAdapter, validate_call
 
 from helius.models import (
     AccountInfo,
     Block,
     BlockCommitment,
+    ClusterNode,
     EpochInfo,
     EpochSchedule,
     InflationGovernor,
     InflationRate,
     LargestAccount,
     TransactionSignature,
-    ClusterNode,
 )
 
 
