@@ -1,8 +1,7 @@
-from pprint import pprint
 from typing import Annotated, Literal
 import httpx
 from dotenv import dotenv_values
-from pydantic import BaseModel, Field, validate_call
+from pydantic import Field, validate_call
 
 from helius.models import (
     AccountInfo,
