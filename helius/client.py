@@ -71,28 +71,23 @@ class HeliusClient:
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
             )
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "encoding": encoding,
-                "dataSlice": (
+        request = (
+            RpcRequest(method="getAccountInfo")
+            .add(public_key)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set(
+                "dataSlice",
+                (
                     {"offset": data_slice_offset, "length": data_slice_length}
                     if data_slice_offset is not None and data_slice_length is not None
                     else None
                 ),
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getAccountInfo",
-                "params": [public_key, config] if config != {} else [public_key],
-            }
+            )
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
+        response = self._send(request)
         account_info = AccountInfo.model_validate(response["result"])
         return account_info
 
@@ -102,22 +97,14 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
         min_context_slot: int | None = None,
     ) -> int:
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBalance",
-                "params": [public_key, config] if config != {} else [public_key],
-            }
+        request = (
+            RpcRequest(method="getBalance")
+            .add(public_key)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
+        response = self._send(request)
         return response["result"]["value"]
 
     def get_block(
@@ -129,26 +116,15 @@ class HeliusClient:
         rewards: bool = False,
         max_supported_transcation_version: int | None = None,
     ) -> Block | None:
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "encoding": encoding,
-                "transactionDetails": transaction_details,
-                "rewards": rewards,
-                "maxSupportedTransactionVersion": max_supported_transcation_version,
-            }.items()
-            if value is not None
-        }
-        request = httpx.Request(
-            method="POST",
-            url="/",
-            json={
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlock",
-                "params": [slot, config] if config != {} else [slot],
-            },
+        request = (
+            RpcRequest(method="getBlock")
+            .add(slot)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set("transactionDetails", transaction_details)
+            .set("rewards", rewards)
+            .set("maxSupportedTransactionVersion", max_supported_transcation_version)
+            .build()
         )
         response = self._send(request)
         block = Block.model_validate(response["result"])
@@ -158,16 +134,9 @@ class HeliusClient:
         self,
         slot: int,
     ) -> BlockCommitment:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlockCommitment",
-                "params": [slot],
-            }
-        )
-        result = response.json()["result"]
-        block_commitment = BlockCommitment.model_validate(result)
+        request = RpcRequest(method="getBlockCommitment").add(slot).build()
+        response = self._send(request)
+        block_commitment = BlockCommitment.model_validate(response["result"])
         return block_commitment
 
     def get_block_height(
@@ -175,22 +144,13 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
         min_context_slot: int | None = None,
     ) -> int:
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlock",
-                "params": [config] if config != {} else [],
-            }
+        request = (
+            RpcRequest(method="getBlockHeight")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
+        response = self._send(request)
         return response["result"]
 
     def get_block_production(
@@ -203,37 +163,28 @@ class HeliusClient:
         """
         At least one of identity or first_slot must be provided.
         """
-        if (identity is None and first_slot is not None) or (
-            identity is not None and first_slot is None
-        ):
-            raise ValueError("At least one of identity or first_slot must be provided.")
-        if first_slot is None and last_slot is not None:
-            raise ValueError("To set last_slot, first_slot is required.")
-        if first_slot is None and last_slot is None:
-            range = None
-        elif first_slot is not None:
+        if first_slot is None:
+            if identity is None:
+                raise ValueError(
+                    "At least one of identity or first_slot must be provided."
+                )
+            if last_slot is not None:
+                raise ValueError("To set last_slot, first_slot is required.")
+            if last_slot is None:
+                range = None
+        else:
             range = {"firstSlot": first_slot}
             if last_slot is not None:
                 range.update({"lastSlot": last_slot})
-        else:
-            raise ValueError("Set both first_slot or last_slot or neither.")
-        params = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "range": range,
-                "identity": identity,
-            }.items()
-            if value is not None
-        }
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlockProduction",
-                "params": [params] if params != {} else [],
-            }
+        request = (
+            RpcRequest(method="getBlockProduction")
+            .set("commitment", commitment)
+            .set("first_slot", first_slot)
+            .set("lastSlot", last_slot)
+            .set("identity", identity)
+            .build()
         )
+        response = self._send(request)
         context = response["result"]["context"]
         value = response["result"]["value"]
         return context, value
@@ -248,19 +199,14 @@ class HeliusClient:
         If not provided, the query will return blocks up to the latest confirmed slot from start_slot.
         The range between start_slot and end_slot (or latest slot if end_slot is omitted) must not exceed 500,000 slots.
         """
-        params: list = [start_slot]
-        if end_slot is not None:
-            params.append(end_slot)
-        if commitment is not None:
-            params.append({"commitment": commitment})
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlock",
-                "params": params,
-            }
+        request = (
+            RpcRequest(method="getBlocks")
+            .add(start_slot)
+            .add(end_slot)
+            .set("commitment", commitment)
+            .build()
         )
+        response = self._send(request)
         return response["result"]
 
     def get_blocks_with_limit(
@@ -269,38 +215,24 @@ class HeliusClient:
         limit: int,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> list[int]:
-        params: list = [start_slot, limit]
-        if commitment is not None:
-            params.append({"commitment": commitment})
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlockWithLimit",
-                "params": params,
-            }
+        request = (
+            RpcRequest(method="getBlocksWithLimit")
+            .add(start_slot)
+            .add(limit)
+            .set("commitment", commitment)
+            .build()
         )
+        response = self._send(request)
         return response["result"]
 
     def get_block_time(self, slot: int) -> int | None:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getBlockTime",
-                "params": [slot],
-            }
-        )
+        request = RpcRequest(method="getBlockTime").add(slot).build()
+        response = self._send(request)
         return response["result"]
 
     def get_cluster_nodes(self) -> list[ClusterNode]:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getClusterNodes",
-            }
-        )
+        request = RpcRequest(method="getClusterNodes").build()
+        response = self._send(request)
         ta = TypeAdapter(list[ClusterNode])
         cluster_nodes = ta.validate_python(response["result"])
         return cluster_nodes
@@ -309,34 +241,20 @@ class HeliusClient:
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
-    ):
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getEpochInfo",
-                "params": [config] if config != {} else [],
-            }
+    ) -> EpochInfo:
+        request = (
+            RpcRequest(method="getEpochInfo")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
+        response = self._send(request)
         epoch_info = EpochInfo.model_validate(response["result"])
         return epoch_info
 
     def get_epoch_schedule(self) -> EpochSchedule:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getEpochSchedule",
-            }
-        )
+        request = RpcRequest(method="getEpochSchedule").build()
+        response = self._send(request)
         epoch_schedule = EpochSchedule.model_validate(response["result"])
         return epoch_schedule
 
@@ -346,80 +264,44 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
         min_context_slot: int | None = None,
     ) -> tuple[dict, int | None]:
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        params: list = [message]
-        if config != {}:
-            params.append(config)
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getFeeForMessage",
-                "params": params,
-            }
+        request = (
+            RpcRequest(method="getFeeForMessage")
+            .add(message)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
+        response = self._send(request)
         context = response["result"]["context"]
         value = response["result"]["value"]
         return context, value
 
     def get_first_available_block(self) -> int:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getFirstAvailableBlock",
-            }
-        )
+        request = RpcRequest(method="getFirstAvailableBlock").build()
+        response = self._send(request)
         return response["result"]
 
     def get_genesis_hash(self) -> str:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getGenesisHash",
-            }
-        )
+        request = RpcRequest(method="getGenesisHash").build()
+        response = self._send(request)
         return response["result"]
 
     def get_health(self) -> bool:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getHealth",
-            }
-        )
+        request = RpcRequest(method="getHealth").build()
+        response = self._send(request)
         if "result" in response and response["result"] == "ok":
             return True
         else:
             return False
 
     def get_highest_snapshot_slot(self) -> dict:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getHighestSnapshotSlot",
-            }
-        )
+        request = RpcRequest(method="getHighestSnapshotSlot").build()
+        response = self._send(request)
         return response["result"]
 
     def get_identity(self) -> str:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getIdentity",
-            }
-        )
+        request = RpcRequest(method="getIdentity").build()
+        response = self._send(request)
         identity = response["result"]["identity"]
         return identity
 
@@ -427,25 +309,18 @@ class HeliusClient:
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> InflationGovernor:
-        payload = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "getInflationGovernor",
-        }
-        if commitment is not None:
-            payload.update({"commitment": commitment})
-        response = self._send(payload)
+        request = (
+            RpcRequest(method="getInflationGovernor")
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
         inflation_governor = InflationGovernor.model_validate(response["result"])
         return inflation_governor
 
     def get_inflation_rate(self) -> InflationRate:
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getInflationRate",
-            }
-        )
+        request = RpcRequest(method="getInflationRate").build()
+        response = self._send(request)
         inflation_rate = InflationRate.model_validate(response["result"])
         return inflation_rate
 
@@ -456,24 +331,13 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         filter: Literal["circulating", "nonCirculating"] | None = None,
     ) -> list[LargestAccount]:
-        request_json = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "getLargestAccounts",
-        }
-        config = {
-            key: value
-            for key, value in {
-                "commitment": commitment,
-                "filter": filter,
-            }.items()
-            if value is not None
-        }
-        if config != {}:
-            request_json.update({"params": [config]})
-        response = self._send(
-            request_json,
+        request = (
+            RpcRequest(method="getLargestAccounts")
+            .set("commitment", commitment)
+            .set("filter", filter)
+            .build()
         )
+        response = self._send(request)
         value = response["result"]["value"]
         ta = TypeAdapter(list[LargestAccount])
         largest_accounts = ta.validate_python(value)
@@ -489,29 +353,64 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed"] | None = None,
         min_context_slot: int | None = None,
     ) -> list[TransactionSignature]:
-        config = {
-            key: value
-            for key, value in {
-                "limit": limit,
-                "before": before,
-                "until": until,
-                "commitment": commitment,
-                "minContextSlot": min_context_slot,
-            }.items()
-            if value is not None
-        }
-        params: list = [address]
-        if config != {}:
-            params.append(config)
-        response = self._send(
-            {
-                "jsonrpc": "2.0",
-                "id": 1,
-                "method": "getSignaturesForAddress",
-                "params": params,
-            }
+        request = (
+            RpcRequest(method="getSignaturesForAddress")
+            .add(address)
+            .set("limit", limit)
+            .set("before", before)
+            .set("until", until)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
         )
-        transaction_signatures: list[TransactionSignature] = []
+        response = self._send(request)
         ta = TypeAdapter(list[TransactionSignature])
         transaction_signatures = ta.validate_python(response["result"])
         return transaction_signatures
+
+
+class RpcRequest:
+    class Request(BaseModel):
+        jsonrpc: str
+        method: str
+        params: list[Any] | None = None
+        id: str | int | None
+
+    def __init__(
+        self,
+        *,
+        jsonrpc: str = "2.0",
+        method: str,
+        id: str | int | None = 1,
+    ):
+        self._jsonrpc = jsonrpc
+        self._method = method
+        self._id = id
+        self._positional: list[Any] = []
+        self._config: dict[str, Any] = {}
+
+    def add(self, value, can_be_none: bool = False):
+        if value is not None:
+            self._positional.append(value)
+        elif can_be_none:
+            self._positional.append(None)
+        return self
+
+    def set(self, key: str, value, can_be_none: bool = False):
+        if value is not None:
+            self._config.update({key: value})
+        elif can_be_none:
+            self._config.update({key: None})
+        return self
+
+    def build(self):
+        params = self._positional if self._positional else []
+        if self._config:
+            params.append(self._config)
+        request = {
+            "method": self._method,
+            "id": self._id,
+        }
+        if params:
+            request.update({"params": params})
+        return self.Request(**request).model_dump()
