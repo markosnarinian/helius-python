@@ -1,7 +1,14 @@
 from typing import Annotated, Literal
 import httpx
 from dotenv import dotenv_values
-from pydantic import Field, TypeAdapter, validate_call
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    TypeAdapter,
+    field_serializer,
+    validate_call,
+)
 
 from helius.models import (
     AccountInfo,
@@ -348,12 +355,15 @@ class HeliusClient:
             }.items()
             if value is not None
         }
+        params: list = [message]
+        if config != {}:
+            params.append(config)
         response = self._send(
             {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getFeeForMessage",
-                "params": [message, config] if config != {} else [message],
+                "params": params,
             }
         )
         context = response["result"]["context"]
@@ -447,7 +457,12 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         filter: Literal["circulating", "nonCirculating"] | None = None,
     ) -> list[LargestAccount]:
-        options = {
+        request_json = {
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "getLargestAccounts",
+        }
+        config = {
             key: value
             for key, value in {
                 "commitment": commitment,
@@ -455,16 +470,8 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        request_json = {
-            "jsonrpc": "2.0",
-            "id": 1,
-            "method": "getLargestAccounts",
-            "params": [
-                {"filter": "circulating"},
-            ],
-        }
-        if options != {}:
-            request_json.update({"params": [options]})
+        if config != {}:
+            request_json.update({"params": [config]})
         response = self._send(
             request_json,
         )
@@ -483,7 +490,7 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed"] | None = None,
         min_context_slot: int | None = None,
     ) -> list[TransactionSignature]:
-        options = {
+        config = {
             key: value
             for key, value in {
                 "limit": limit,
@@ -494,12 +501,15 @@ class HeliusClient:
             }.items()
             if value is not None
         }
+        params: list = [address]
+        if config != {}:
+            params.append(config)
         response = self._send(
             {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getSignaturesForAddress",
-                "params": [address, options] if options != {} else [address],
+                "params": params,
             }
         )
         transaction_signatures: list[TransactionSignature] = []
