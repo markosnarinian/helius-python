@@ -27,7 +27,6 @@ from helius.models import (
 class HeliusClient:
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
-    # HACK: build requests with pydantic models and model_dump()
     def __init__(
         self,
         *,
