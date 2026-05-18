@@ -31,6 +31,25 @@ class HeliusClient:
         self.api_key = api_key or dotenv_values().get("HELIUS_API_KEY")
         if not self.api_key:
             raise ValueError("No API key provided.")
+        self._client = httpx.Client(
+            base_url=self.base_url,
+            params={"api-key": self.api_key},
+        )
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._client.close()
+
+    def __del__(self):
+        self._client.close()
+
+    def _send(self, json: dict, method="POST", url="/") -> dict:
+        request = httpx.Request(method=method, url=url, json=json)
+        response = self._client.send(request)
+        response.raise_for_status()
+        return response.json()
 
     def get_account_info(
         self,
@@ -59,19 +78,15 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getAccountInfo",
                 "params": [public_key, config] if config != {} else [public_key],
-            },
+            }
         )
-        response.raise_for_status()
-        result = response.json()["result"]
-        account_info = AccountInfo.model_validate(result)
+        account_info = AccountInfo.model_validate(response["result"])
         return account_info
 
     def get_balance(
@@ -88,19 +103,16 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBalance",
                 "params": [public_key, config] if config != {} else [public_key],
-            },
+            }
         )
-        response.raise_for_status()
-        result = response.json()["result"]
-        return result["value"]
+        response = self._send(request)
+        return response["result"]["value"]
 
     def get_block(
         self,
@@ -122,9 +134,9 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
+        request = httpx.Request(
+            method="POST",
+            url="/",
             json={
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -132,23 +144,21 @@ class HeliusClient:
                 "params": [slot, config] if config != {} else [slot],
             },
         )
-        result = response.json()["result"]
-        block = Block.model_validate(result)
+        response = self._send(request)
+        block = Block.model_validate(response["result"])
         return block
 
     def get_block_commitment(
         self,
         slot: int,
     ) -> BlockCommitment:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlockCommitment",
                 "params": [slot],
-            },
+            }
         )
         result = response.json()["result"]
         block_commitment = BlockCommitment.model_validate(result)
@@ -167,18 +177,15 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlock",
                 "params": [config] if config != {} else [],
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_block_production(
         self,
@@ -213,19 +220,16 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlockProduction",
                 "params": [params] if params != {} else [],
-            },
+            }
         )
-        result = response.json()["result"]
-        context = result["context"]
-        value = result["value"]
+        context = response["result"]["context"]
+        value = response["result"]["value"]
         return context, value
 
     def get_blocks(
@@ -243,18 +247,15 @@ class HeliusClient:
             params.append(end_slot)
         if commitment is not None:
             params.append({"commitment": commitment})
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlock",
                 "params": params,
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_blocks_with_limit(
         self,
@@ -265,42 +266,37 @@ class HeliusClient:
         params: list = [start_slot, limit]
         if commitment is not None:
             params.append({"commitment": commitment})
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlockWithLimit",
                 "params": params,
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_block_time(self, slot: int) -> int | None:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getBlockTime",
                 "params": [slot],
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_cluster_nodes(self) -> list[ClusterNode]:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={"jsonrpc": "2.0", "id": 1, "method": "getClusterNodes"},
+        response = self._send(
+            {
+                "jsonrpc": "2.0",
+                "id": 1,
+                "method": "getClusterNodes",
+            }
         )
-        result = response.json()["result"]
         ta = TypeAdapter(list[ClusterNode])
-        cluster_nodes = ta.validate_python(result)
+        cluster_nodes = ta.validate_python(response["result"])
         return cluster_nodes
 
     def get_epoch_info(
@@ -316,32 +312,26 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getEpochInfo",
                 "params": [config] if config != {} else [],
-            },
+            }
         )
-        result = response.json()["result"]
-        epoch_info = EpochInfo.model_validate(result)
+        epoch_info = EpochInfo.model_validate(response["result"])
         return epoch_info
 
     def get_epoch_schedule(self) -> EpochSchedule:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getEpochSchedule",
-            },
+            }
         )
-        result = response.json()["result"]
-        epoch_schedule = EpochSchedule.model_validate(result)
+        epoch_schedule = EpochSchedule.model_validate(response["result"])
         return epoch_schedule
 
     def get_fee_for_message(
@@ -358,88 +348,70 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getFeeForMessage",
                 "params": [message, config] if config != {} else [message],
-            },
+            }
         )
-        result = response.json()["result"]
-        context = result["context"]
-        value = result["value"]
+        context = response["result"]["context"]
+        value = response["result"]["value"]
         return context, value
 
     def get_first_available_block(self) -> int:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getFirstAvailableBlock",
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_genesis_hash(self) -> str:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getGenesisHash",
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_health(self) -> bool:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getHealth",
-            },
+            }
         )
-        response_json = response.json()
-        if "result" in response_json and response_json["result"] == "ok":
+        if "result" in response and response["result"] == "ok":
             return True
         else:
             return False
 
     def get_highest_snapshot_slot(self) -> dict:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getHighestSnapshotSlot",
-            },
+            }
         )
-        result = response.json()["result"]
-        return result
+        return response["result"]
 
     def get_identity(self) -> str:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getIdentity",
-            },
+            }
         )
-        result = response.json()["result"]
-        identity = result["identity"]
+        identity = response["result"]["identity"]
         return identity
 
     def get_inflation_governor(
@@ -453,27 +425,19 @@ class HeliusClient:
         }
         if commitment is not None:
             payload.update({"commitment": commitment})
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json=payload,
-        )
-        result = response.json()["result"]
-        inflation_governor = InflationGovernor.model_validate(result)
+        response = self._send(payload)
+        inflation_governor = InflationGovernor.model_validate(response["result"])
         return inflation_governor
 
     def get_inflation_rate(self) -> InflationRate:
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getInflationRate",
-            },
+            }
         )
-        result = response.json()["result"]
-        inflation_rate = InflationRate.model_validate(result)
+        inflation_rate = InflationRate.model_validate(response["result"])
         return inflation_rate
 
     # TODO: getInflationReward
@@ -501,13 +465,10 @@ class HeliusClient:
         }
         if options != {}:
             request_json.update({"params": [options]})
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json=request_json,
+        response = self._send(
+            request_json,
         )
-        result = response.json()["result"]
-        value = result["value"]
+        value = response["result"]["value"]
         ta = TypeAdapter(list[LargestAccount])
         largest_accounts = ta.validate_python(value)
         return largest_accounts
@@ -533,19 +494,15 @@ class HeliusClient:
             }.items()
             if value is not None
         }
-        response = httpx.post(
-            self.base_url,
-            params={"api-key": self.api_key},
-            json={
+        response = self._send(
+            {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "method": "getSignaturesForAddress",
                 "params": [address, options] if options != {} else [address],
-            },
+            }
         )
-        response.raise_for_status()
         transaction_signatures: list[TransactionSignature] = []
-        result = response.json()["result"]
         ta = TypeAdapter(list[TransactionSignature])
-        transaction_signatures = ta.validate_python(result)
+        transaction_signatures = ta.validate_python(response["result"])
         return transaction_signatures
