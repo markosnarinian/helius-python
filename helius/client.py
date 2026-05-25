@@ -381,6 +381,21 @@ class HeliusClient:
         result = response["result"]
         return result
 
+    def get_minimum_balance_for_rent_exemption(
+        self,
+        data_length: int,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> int:
+        request = (
+            RpcRequest(method="getMinimumBalanceForRentExemption")
+            .add(data_length)
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        return result
+
     @validate_call
     def get_signatures_for_address(
         self,
