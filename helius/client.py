@@ -336,6 +336,22 @@ class HeliusClient:
         largest_accounts = ta.validate_python(value)
         return largest_accounts
 
+    def get_latest_blockhash(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> tuple[str, int]:
+        request = (
+            RpcRequest(method="getLatestBlockhash")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        blockhash = response["result"]["blockhash"]
+        last_valid_block_height = response["result"]["lastValidBlockHeight"]
+        return (blockhash, last_valid_block_height)
+
     @validate_call
     def get_signatures_for_address(
         self,
