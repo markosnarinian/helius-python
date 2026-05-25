@@ -352,6 +352,23 @@ class HeliusClient:
         last_valid_block_height = response["result"]["lastValidBlockHeight"]
         return (blockhash, last_valid_block_height)
 
+    def get_leader_schedule(
+        self,
+        slot: int | None = None,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        identity: str | None = None,
+    ) -> dict[str, list[int]] | None:
+        request = (
+            RpcRequest(method="getLeaderSchedule")
+            .add(slot)
+            .set("commitment", commitment)
+            .set("identity", identity)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        return result
+
     @validate_call
     def get_signatures_for_address(
         self,
