@@ -369,6 +369,12 @@ class HeliusClient:
         result = response["result"]
         return result
 
+    def get_max_retransmit_slot(self) -> int:
+        request = RpcRequest(method="getMaxRetransmitSlot").build()
+        response = self._send(request)
+        result = response["result"]
+        return result
+
     @validate_call
     def get_signatures_for_address(
         self,
