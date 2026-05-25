@@ -106,6 +106,7 @@ class InflationRate(BaseModel):
 
 
 # TODO: consider creating an account details composite model
+# HACK: Simply return a tuple
 class LargestAccount(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 

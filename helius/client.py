@@ -5,7 +5,7 @@ from dotenv import dotenv_values
 from pydantic import BaseModel, Field, TypeAdapter, validate_call
 
 from helius.models import (
-    AccountInfo,
+    Account,
     Block,
     BlockCommitment,
     ClusterNode,
@@ -59,7 +59,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> AccountInfo | None:
+    ) -> Account | None:
         if (data_slice_offset is None) != (data_slice_length is None):
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
@@ -81,7 +81,7 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        account_info = AccountInfo.model_validate(response["result"])
+        account_info = Account.model_validate(response["result"])
         return account_info
 
     def get_balance(
@@ -395,6 +395,42 @@ class HeliusClient:
         response = self._send(request)
         result = response["result"]
         return result
+
+    def get_multiple_accounts(
+        self,
+        pubkeys: list[str],
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: (
+            Literal["base64", "base58", "base64+zstd", "jsonParsed"] | None
+        ) = None,
+        data_slice_offset: int | None = None,
+        data_slice_length: int | None = None,
+    ):
+        if (data_slice_offset is None) != (data_slice_length is None):
+            raise ValueError(
+                "Set both data_slice_length and data_slice_offset or neither."
+            )
+        if (
+            data_slice_length is not None
+            and data_slice_offset is not None
+            and encoding not in ["base58", "base64", "base64+zstd"]
+        ):
+            raise ValueError(
+                "Data slice is only available for base58, base64, or base64+zstd encodings."
+            )
+        request = (
+            RpcRequest(method="getMultipleAccounts")
+            .add(pubkeys)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set("data_slice_offset", data_slice_offset)
+            .set("data_slice_length", data_slice_length)
+            .build()
+        )
+        response = self._send(request)
+        value = response["result"]["value"]
+        accounts = [Account.model_validate(i) for i in value]
+        return accounts
 
     @validate_call
     def get_signatures_for_address(
