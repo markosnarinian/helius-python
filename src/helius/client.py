@@ -49,9 +49,12 @@ class HeliusClient:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self._client.close()
+        self.close()
 
     def __del__(self):
+        self.close()
+
+    def close(self) -> None:
         self._client.close()
 
     def _send(self, json: dict, method="POST", url="/") -> dict:
