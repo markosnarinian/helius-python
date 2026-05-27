@@ -106,6 +106,11 @@ Client classes also implement `__del__` as a safety net — if you forget to
 `close()` or use `with`, the underlying HTTP client is still closed when the
 instance is garbage-collected. Prefer `with` or `close()` regardless.
 
+> 🚧 **Exception & error handling is a work in progress.** Today, transport
+> errors surface as raw `httpx` exceptions and Helius/Solana RPC errors are
+> not yet wrapped in typed exception classes. A consistent error hierarchy is
+> being worked on.
+
 ### Defaults
 
 | Argument  | Default                              | Notes                                                                                         |
