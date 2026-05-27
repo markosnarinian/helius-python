@@ -73,7 +73,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> Account | None:
+    ) -> tuple[dict, Account | None]:
         if (data_slice_offset is None) != (data_slice_length is None):
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
@@ -95,15 +95,17 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        account_info = Account.model_validate(response["result"])
-        return account_info
+        context = response["result"]["context"]
+        value = response["result"]["value"]
+        account_info = Account.model_validate(value) if value is not None else None
+        return context, account_info
 
     def get_balance(
         self,
         public_key: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
-    ) -> int:
+    ) -> tuple[dict, int]:
         request = (
             RpcRequest(method="getBalance")
             .add(public_key)
@@ -112,7 +114,9 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        return response["result"]["value"]
+        context = response["result"]["context"]
+        value = response["result"]["value"]
+        return context, value
 
     def get_block(
         self,
@@ -338,7 +342,7 @@ class HeliusClient:
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         filter: Literal["circulating", "nonCirculating"] | None = None,
-    ) -> list[LamportAccount]:
+    ) -> tuple[dict, list[LamportAccount]]:
         request = (
             RpcRequest(method="getLargestAccounts")
             .set("commitment", commitment)
@@ -346,16 +350,17 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
+        context = response["result"]["context"]
         value = response["result"]["value"]
         ta = TypeAdapter(list[LamportAccount])
         largest_accounts = ta.validate_python(value)
-        return largest_accounts
+        return context, largest_accounts
 
     def get_latest_blockhash(
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
-    ) -> tuple[str, int]:
+    ) -> tuple[dict, str, int]:
         request = (
             RpcRequest(method="getLatestBlockhash")
             .set("commitment", commitment)
@@ -363,9 +368,11 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        blockhash = response["result"]["blockhash"]
-        last_valid_block_height = response["result"]["lastValidBlockHeight"]
-        return (blockhash, last_valid_block_height)
+        context = response["result"]["context"]
+        value = response["result"]["value"]
+        blockhash = value["blockhash"]
+        last_valid_block_height = value["lastValidBlockHeight"]
+        return context, blockhash, last_valid_block_height
 
     def get_leader_schedule(
         self,
@@ -420,7 +427,7 @@ class HeliusClient:
         ) = None,
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
-    ):
+    ) -> tuple[dict, list[Account | None]]:
         if (data_slice_offset is None) != (data_slice_length is None):
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
@@ -443,9 +450,10 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
+        context = response["result"]["context"]
         value = response["result"]["value"]
-        accounts = [Account.model_validate(i) for i in value]
-        return accounts
+        accounts = [Account.model_validate(i) if i is not None else None for i in value]
+        return context, accounts
 
     @validate_call
     def get_program_accounts(
@@ -595,14 +603,16 @@ class HeliusClient:
     def get_stake_minimum_delegation(
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-    ) -> int:
+    ) -> tuple[dict, int]:
         request = (
             RpcRequest(method="getStakeMinimumDelegation")
             .set("commitment", commitment)
             .build()
         )
         response = self._send(request)
-        return response["result"]["value"]
+        context = response["result"]["context"]
+        value = response["result"]["value"]
+        return context, value
 
     def get_supply(
         self,
@@ -629,15 +639,17 @@ class HeliusClient:
         self,
         token_account: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-    ) -> TokenAccountBalance:
+    ) -> tuple[dict, TokenAccountBalance]:
         request = (
-            RpcRequest(method="getTokenTokenAccountBalance")
+            RpcRequest(method="getTokenAccountBalance")
             .add(token_account)
             .set("commitment", commitment)
             .build()
         )
         response = self._send(request)
-        return TokenAccountBalance.model_validate(response["result"]["value"])
+        context = response["result"]["context"]
+        balance = TokenAccountBalance.model_validate(response["result"]["value"])
+        return context, balance
 
     def get_token_accounts_by_delegate(
         self,
@@ -651,7 +663,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> list[tuple[str, Account]]:
+    ) -> tuple[dict, list[tuple[str, Account]]]:
         if (mint is None) == (program_id is None):
             raise ValueError("Provide exactly one of mint or program_id.")
         if (data_slice_offset is None) != (data_slice_length is None):
@@ -681,11 +693,12 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
+        context = response["result"]["context"]
         token_accounts = [
             (i["pubkey"], Account.model_validate(i["account"]))
             for i in response["result"]["value"]
         ]
-        return token_accounts
+        return context, token_accounts
 
     def get_token_accounts_by_owner(
         self,
@@ -699,7 +712,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> list[tuple[str, Account]]:
+    ) -> tuple[dict, list[tuple[str, Account]]]:
         if (mint is None) == (program_id is None):
             raise ValueError("Provide exactly one of mint or program_id.")
         if (data_slice_offset is None) != (data_slice_length is None):
@@ -729,11 +742,12 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
+        context = response["result"]["context"]
         token_accounts = [
             (i["pubkey"], Account.model_validate(i["account"]))
             for i in response["result"]["value"]
         ]
-        return token_accounts
+        return context, token_accounts
 
     # TODO: use getTokenAccountsByOwnerV2 and do pagination
 
