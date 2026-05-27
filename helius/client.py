@@ -786,6 +786,26 @@ class HeliusClient:
         transaction = Transaction.model_validate(response["result"])
         return transaction
 
+    def get_transaction_count(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> int:
+        request = (
+            RpcRequest(method="getTransactionCount")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
+    def get_version(self) -> tuple[str, int]:
+        request = RpcRequest(method="getVersion").build()
+        response = self._send(request)
+        result = response["result"]
+        return result["solana-core"], result["feature-set"]
+
 
 class RpcRequest:
     class Request(BaseModel):
