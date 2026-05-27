@@ -3,3 +3,27 @@ typeCheckingMode = "basic"
 
 [tool.isort]
 profile = "black"
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+
+[project]
+build-backend = "hatchling.build"
+name = "helius-python"
+version = "0.0.1"
+authors = [
+  { name="Markos Narinian", email="manarinian@gmail.com" },
+]
+description = "Typed Python client for the Helius API"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/markosnarinian/helius-python"
+Issues = "https://github.com/markosnarinian/helius-python/issues"
