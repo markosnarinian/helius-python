@@ -174,14 +174,30 @@ The method names map 1:1 to the Solana JSON-RPC spec, just converted to
 | `getTransaction`                  | `client.get_transaction(...)`              |
 | `getTransactionCount`             | `client.get_transaction_count(...)`        |
 | `getVersion`                      | `client.get_version()`                     |
+| `getVoteAccounts`                  | `client.get_vote_accounts(...)`            |
+| `isBlockhashValid`                 | `client.is_blockhash_valid(...)`           |
+| `minimumLedgerSlot`                | `client.minimum_ledger_slot()`             |
+| `requestAirdrop`                   | `client.request_airdrop(...)`              |
 
 ### Reference
 
-The functions are intentionally thin and intuitive — for a full description
-of each method's parameters, semantics, and response shape, refer to the
-[Helius RPC docs](https://www.helius.dev/docs/rpc) and the
-[Solana JSON-RPC docs](https://solana.com/docs/rpc). Anywhere this client
-deviates from upstream, the behavior is documented in the method's docstring.
+The table above is a quick index of what's implemented. For each method's
+parameters, semantics, return shape, edge cases, and links to the underlying
+Helius docs, see the **API reference** (🚧 hosted version coming soon).
+
+In the meantime, every public method and model carries a Google-style
+docstring that is the source of truth for that symbol. You can read it
+straight from a REPL:
+
+```python
+from helius import HeliusClient
+help(HeliusClient.get_balance)
+```
+
+or from your editor's inline help / hover. Each docstring links back to the
+relevant [Helius RPC guide](https://www.helius.dev/docs/rpc) and
+[Helius API reference](https://www.helius.dev/docs/api-reference) page so you
+can always confirm behavior against upstream.
 
 If you hit a bug, a missing parameter, or surprising behavior, please
 [open an issue](https://github.com/markosnarinian/helius-python/issues).
