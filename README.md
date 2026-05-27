@@ -63,8 +63,14 @@ from helius.client import HeliusClient
 client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
 ```
 
-or set it in a `.env` file at the project root and let the client pick it up
-automatically:
+or set `HELIUS_API_KEY` as an environment variable:
+
+```bash
+export HELIUS_API_KEY=your_helius_api_key
+```
+
+You can also set it in a `.env` file at the project root and let the client
+pick it up automatically:
 
 ```env
 HELIUS_API_KEY=your_helius_api_key
@@ -73,7 +79,7 @@ HELIUS_API_KEY=your_helius_api_key
 ```python
 from helius.client import HeliusClient
 
-client = HeliusClient()  # reads HELIUS_API_KEY from .env
+client = HeliusClient()  # reads HELIUS_API_KEY from the environment or .env
 ```
 
 ## Usage
@@ -125,7 +131,7 @@ instance is garbage-collected. Prefer `with` or `close()` regardless.
 | Argument  | Default                              | Notes                                                                                         |
 | --------- | ------------------------------------ | --------------------------------------------------------------------------------------------- |
 | `base_url`| `"https://mainnet.helius-rpc.com"`   | Override to point at devnet, staging, or a custom Helius endpoint.                            |
-| `api_key` | `None` → falls back to `HELIUS_API_KEY` in a `.env` file | If neither is provided, the constructor raises `ValueError`.   |
+| `api_key` | `None` → falls back to `HELIUS_API_KEY` from the environment, then `.env` | If none is provided, the constructor raises `ValueError`.   |
 
 Per-method RPC parameters (`commitment`, `encoding`, `min_context_slot`, etc.)
 are left unset by default — the Helius/Solana server defaults apply unless you

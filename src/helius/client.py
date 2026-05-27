@@ -1,3 +1,4 @@
+import os
 from typing import Annotated, Any, Literal
 
 import httpx
@@ -38,7 +39,11 @@ class HeliusClient:
         api_key: str | None = None,
     ) -> None:
         self.base_url = base_url
-        self.api_key = api_key or dotenv_values().get("HELIUS_API_KEY")
+        self.api_key = (
+            api_key
+            or os.environ.get("HELIUS_API_KEY")
+            or dotenv_values().get("HELIUS_API_KEY")
+        )
         if not self.api_key:
             raise ValueError("No API key provided.")
         self._client = httpx.Client(
