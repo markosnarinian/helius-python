@@ -13,7 +13,7 @@ class TransactionSignature(BaseModel):
     confirmation_status: str | None
 
 
-class AccountInfo(BaseModel):
+class Account(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
     lamports: int
@@ -105,6 +105,16 @@ class InflationRate(BaseModel):
     epoch: int
 
 
+class PerformanceSample(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    slot: int
+    num_transactions: int
+    num_non_vote_transactions: int
+    sample_period_secs: int
+    num_slots: int
+
+
 # TODO: consider creating an account details composite model
 # HACK: Simply return a tuple
 class LargestAccount(BaseModel):
@@ -112,3 +122,30 @@ class LargestAccount(BaseModel):
 
     address: str
     lamports: int
+
+
+class SignatureStatus(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    slot: int
+    confirmations: int | None
+    err: dict | None
+    confirmation_status: str | None
+
+
+class Supply(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    total: int
+    circulating: int
+    non_circulating: int
+    non_circulating_accounts: list[str] | None = None
+
+
+class TokenAccountBalance(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    amount: str
+    decimals: int
+    ui_amount: float | None
+    ui_amount_string: str

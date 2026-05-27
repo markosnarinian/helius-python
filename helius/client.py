@@ -14,6 +14,10 @@ from helius.models import (
     InflationGovernor,
     InflationRate,
     LargestAccount,
+    PerformanceSample,
+    SignatureStatus,
+    Supply,
+    TokenAccountBalance,
     TransactionSignature,
 )
 
@@ -21,6 +25,7 @@ from helius.models import (
 class HeliusClient:
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
+    # TODO: check all http methods and all guides and implement pagination and other non-implemented features
     def __init__(
         self,
         *,
@@ -54,8 +59,10 @@ class HeliusClient:
     def get_account_info(
         self,
         public_key: str,
-        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
-        encoding: Literal["base58", "base64", "base64+zstd", "jsonParsed"] = "base64",
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: (
+            Literal["base58", "base64", "base64+zstd", "jsonParsed"] | None
+        ) = None,
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
@@ -73,7 +80,7 @@ class HeliusClient:
                 "dataSlice",
                 (
                     {"offset": data_slice_offset, "length": data_slice_length}
-                    if data_slice_offset is not None and data_slice_length is not None
+                    if data_slice_offset is not None
                     else None
                 ),
             )
@@ -87,7 +94,7 @@ class HeliusClient:
     def get_balance(
         self,
         public_key: str,
-        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> int:
         request = (
@@ -103,10 +110,12 @@ class HeliusClient:
     def get_block(
         self,
         slot: int,
-        commitment: Literal["finalized", "confirmed"] = "finalized",
+        commitment: Literal["finalized", "confirmed"] | None = None,
         encoding: Literal["jsonParsed", "base58", "base64", "base64+std"] | None = None,
-        transaction_details: Literal["full", "accounts", "signatures", "none"] = "full",
-        rewards: bool = False,
+        transaction_details: (
+            Literal["full", "accounts", "signatures", "none"] | None
+        ) = None,
+        rewards: bool | None = None,
         max_supported_transcation_version: int | None = None,
     ) -> Block | None:
         request = (
@@ -134,7 +143,7 @@ class HeliusClient:
 
     def get_block_height(
         self,
-        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> int:
         request = (
@@ -172,8 +181,7 @@ class HeliusClient:
         request = (
             RpcRequest(method="getBlockProduction")
             .set("commitment", commitment)
-            .set("first_slot", first_slot)
-            .set("lastSlot", last_slot)
+            .set("range", range)
             .set("identity", identity)
             .build()
         )
@@ -254,7 +262,7 @@ class HeliusClient:
     def get_fee_for_message(
         self,
         message: str,
-        commitment: Literal["finalized", "confirmed", "processed"] = "finalized",
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> tuple[dict, int | None]:
         request = (
@@ -423,8 +431,8 @@ class HeliusClient:
             .add(pubkeys)
             .set("commitment", commitment)
             .set("encoding", encoding)
-            .set("data_slice_offset", data_slice_offset)
-            .set("data_slice_length", data_slice_length)
+            .set("dataSliceOffset", data_slice_offset)
+            .set("dataSliceLength", data_slice_length)
             .build()
         )
         response = self._send(request)
@@ -462,11 +470,11 @@ class HeliusClient:
                 "dataSlice",
                 (
                     {"offset": data_slice_offset, "length": data_slice_length}
-                    if data_slice_offset is not None and data_slice_length is not None
+                    if data_slice_offset is not None
                     else None
                 ),
             )
-            .set("changed_since_slot", changed_since_slot)
+            .set("changedSinceSlot", changed_since_slot)
             .set("filters", filters)
             .build()
         )
@@ -474,7 +482,26 @@ class HeliusClient:
         result = response["result"]
         return [(i["pubkey"], Account.model_validate(i["account"])) for i in result]
 
-    # TODO: use getProgramAccountsV2 which supports pagination
+    def get_recent_performance_samples(
+        self,
+        limit: int | None = None,
+    ) -> list[PerformanceSample]:
+        request = RpcRequest(method="getRecentPerformanceSamples").add(limit).build()
+        response = self._send(request)
+        ta = TypeAdapter(list[PerformanceSample])
+        return ta.validate_python(response["result"])
+
+    def get_recent_prioritization_fees(
+        self,
+        locked_writable_accounts: list[str] | None = None,
+    ) -> list[tuple[int, int]]:
+        request = (
+            RpcRequest(method="getRecentPrioritizationFees")
+            .add(locked_writable_accounts)
+            .build()
+        )
+        response = self._send(request)
+        return [(i["slot"], i["prioritizationFee"]) for i in response["result"]]
 
     @validate_call
     def get_signatures_for_address(
@@ -500,6 +527,200 @@ class HeliusClient:
         ta = TypeAdapter(list[TransactionSignature])
         transaction_signatures = ta.validate_python(response["result"])
         return transaction_signatures
+
+    def get_signature_statuses(
+        self,
+        signatures: list[str],
+        search_transaction_history: bool | None = None,
+    ) -> tuple[dict, list[SignatureStatus | None]]:
+        request = (
+            RpcRequest(method="getSignatureStatuses")
+            .add(signatures)
+            .set("searchTransactionHistory", search_transaction_history)
+            .build()
+        )
+        response = self._send(request)
+        context = response["result"]["context"]
+        signature_statuses = [
+            SignatureStatus.model_validate(value) if value is not None else value
+            for value in response["result"]["value"]
+        ]
+        return context, signature_statuses
+
+    def get_slot(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> int:
+        request = (
+            RpcRequest(method="getSlot")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
+    def get_slot_leader(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> str:
+        request = (
+            RpcRequest(method="getSlotLeader")
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
+    @validate_call
+    def get_slot_leaders(
+        self,
+        start_slot: int,
+        limit: Annotated[int, Field(ge=1, le=5000)],
+    ) -> list[str]:
+        request = RpcRequest(method="getSlotLeaders").add(start_slot).add(limit).build()
+        response = self._send(request)
+        return response["result"]
+
+    def get_stake_minimum_delegation(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> int:
+        request = (
+            RpcRequest(method="getStakeMinimumDelegation")
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]["value"]
+
+    def get_supply(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        exclude_non_circulating_accounts_list: bool | None = None,
+    ) -> tuple[dict, Supply]:
+        request = (
+            RpcRequest(method="getSupply")
+            .set("commitment", commitment)
+            .set(
+                "excludeNonCirculatingAccountsList",
+                exclude_non_circulating_accounts_list,
+            )
+            .build()
+        )
+        response = self._send(request)
+        context = response["result"]["context"]
+        supply = Supply.model_validate(response["result"]["value"])
+        return context, supply
+
+    # TODO: use getProgramAccountsV2 which supports pagination
+
+    def get_token_account_balance(
+        self,
+        token_account: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> TokenAccountBalance:
+        request = (
+            RpcRequest(method="getTokenAccountBalance")
+            .add(token_account)
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        return TokenAccountBalance.model_validate(response["result"]["value"])
+
+    def get_token_accounts_by_delegate(
+        self,
+        delegate_pub_key: str,
+        mint: str | None = None,
+        program_id: str | None = None,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: (
+            Literal["base58", "base64", "base64+zstd", "jsonParsed"] | None
+        ) = None,
+        data_slice_offset: int | None = None,
+        data_slice_length: int | None = None,
+        min_context_slot: int | None = None,
+    ) -> list[dict]:
+        if (mint is None) == (program_id is None):
+            raise ValueError("Provide exactly one of mint or program_id.")
+        if (data_slice_offset is None) != (data_slice_length is None):
+            raise ValueError(
+                "Set both data_slice_offset and data_slice_length or neither."
+            )
+        if data_slice_offset is not None and encoding == "jsonParsed":
+            raise ValueError(
+                "dataSlice is only for bas58, bas64 and base64+zstd encodings."
+            )
+        filter = {"mint": mint} if mint is not None else {"programId": program_id}
+        request = (
+            RpcRequest(method="getTokenAccountsByDelegate")
+            .add(delegate_pub_key)
+            .add(filter)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set(
+                "dataSlice",
+                (
+                    {"offset": data_slice_offset, "length": data_slice_length}
+                    if data_slice_offset is not None
+                    else None
+                ),
+            )
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]["value"]
+
+    def get_token_accounts_by_owner(
+        self,
+        owner_pub_key: str,
+        mint: str | None = None,
+        program_id: str | None = None,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: (
+            Literal["base58", "base64", "base64+zstd", "jsonParsed"] | None
+        ) = None,
+        data_slice_offset: int | None = None,
+        data_slice_length: int | None = None,
+        min_context_slot: int | None = None,
+    ) -> list[dict]:
+        if (mint is None) == (program_id is None):
+            raise ValueError("Provide exactly one of mint or program_id.")
+        if (data_slice_offset is None) != (data_slice_length is None):
+            raise ValueError(
+                "Set both data_slice_offset and data_slice_length or neither."
+            )
+        if data_slice_offset is not None and encoding == "jsonParsed":
+            raise ValueError(
+                "dataSlice is only for bas58, bas64 and base64+zstd encodings."
+            )
+        filter = {"mint": mint} if mint is not None else {"programId": program_id}
+        request = (
+            RpcRequest(method="getTokenAccountsByOwner")
+            .add(owner_pub_key)
+            .add(filter)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set(
+                "dataSlice",
+                (
+                    {"offset": data_slice_offset, "length": data_slice_length}
+                    if data_slice_offset is not None
+                    else None
+                ),
+            )
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]["value"]
+
+    # TODO: use getTokenAccountsByOwnerV2 and do pagination
 
 
 class RpcRequest:
