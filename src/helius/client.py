@@ -849,6 +849,30 @@ class HeliusClient:
         value = response["result"]["value"]
         return context, value
 
+    def request_airdrop(
+        self,
+        public_key: str,
+        lamports: int,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> str:
+        """
+        Only available on Devnet and Testnet, not Mainnet Beta.
+        """
+        request = (
+            RpcRequest(method="requestAirdrop")
+            .add(public_key)
+            .add(lamports)
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
+    def minimum_ledger_slot(self) -> int:
+        request = RpcRequest(method="minimumLedgerSlot").build()
+        response = self._send(request)
+        return response["result"]
+
 
 class RpcRequest:
     class Request(BaseModel):
