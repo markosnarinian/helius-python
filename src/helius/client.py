@@ -445,8 +445,14 @@ class HeliusClient:
             .add(pubkeys)
             .set("commitment", commitment)
             .set("encoding", encoding)
-            .set("dataSliceOffset", data_slice_offset)
-            .set("dataSliceLength", data_slice_length)
+            .set(
+                "dataSlice",
+                (
+                    {"offset": data_slice_offset, "length": data_slice_length}
+                    if data_slice_offset is not None
+                    else None
+                ),
+            )
             .build()
         )
         response = self._send(request)

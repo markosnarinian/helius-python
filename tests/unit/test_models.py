@@ -150,10 +150,10 @@ def test_inflation_governor_validates_aliases():
 
 def test_inflation_rate_validates_fixture():
     rate = InflationRate.model_validate(
-        {"total": 0.07, "validator": 0.06, "foudnation": 0.01, "epoch": 1}
+        {"total": 0.149, "validator": 0.148, "foundation": 0.001, "epoch": 100}
     )
 
-    assert rate.foudnation == 0.01
+    assert rate.foundation == 0.001
 
 
 def test_performance_sample_validates_aliases():

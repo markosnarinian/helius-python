@@ -92,7 +92,7 @@ class InflationRate(BaseModel):
 
     total: float
     validator: float
-    foudnation: float
+    foundation: float
     epoch: int
 
 
