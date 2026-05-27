@@ -144,6 +144,8 @@ For each model in `src/helius/models.py`:
 
 One fixture per model is enough. The goal is to catch schema mismatches (missing fields, wrong optionality, typos like `foudnation`), not to exhaustively assert every field.
 
+**Fixture keys must come from the Helius docs, not from the model.** If you write the fixture by reading the Python field names and camelCasing them, the test only proves the model agrees with itself — typos like `loaderScheduleSlotOffset` (should be `leaderScheduleSlotOffset`) will pass. Always copy the JSON keys verbatim from the upstream Helius example response.
+
 ### 3. Client methods — `respx`-mocked tests
 
 For each method on `HeliusClient`, write at least one test that asserts **both** sides of the wire:
@@ -152,6 +154,8 @@ For each method on `HeliusClient`, write at least one test that asserts **both**
 - **Return value:** the method correctly parses a canned response into the documented return shape (model, tuple, primitive, etc.).
 
 Also assert that the `api-key` query parameter is present on the request URL.
+
+**The mocked response body must mirror the real upstream shape.** Copy the `result` payload from the Helius docs' example response — do not invent a flatter shape by reading what the Python method indexes into. In particular, if the upstream method returns an `RpcResponse` wrapper (`{"context": {...}, "value": ...}`), the mock must include that wrapper, even if the client method only returns `value`. Otherwise a bug that reads `result["foo"]` instead of `result["value"]["foo"]` will pass the test and fail in production.
 
 Skeleton:
 
