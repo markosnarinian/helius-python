@@ -913,6 +913,7 @@ class RpcRequest:
         if self._config:
             params.append(self._config)
         request = {
+            "jsonrpc": self._jsonrpc,
             "method": self._method,
             "id": self._id,
         }
