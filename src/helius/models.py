@@ -71,7 +71,7 @@ class EpochSchedule(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
     slots_per_epoch: int
-    loader_schedule_slot_offset: int
+    leader_schedule_slot_offset: int
     warmup: bool
     first_normal_epoch: int
     first_normal_slot: int
