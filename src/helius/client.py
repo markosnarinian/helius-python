@@ -810,24 +810,6 @@ class HeliusClient:
         result = response["result"]
         return result["solana-core"], result["feature-set"]
 
-    def is_blockhash_valid(
-        self,
-        blockhash: str,
-        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-        min_context_slot: int | None = None,
-    ) -> tuple[dict, bool]:
-        request = (
-            RpcRequest(method="isBlockhashValid")
-            .add(blockhash)
-            .set("commitment", commitment)
-            .set("minContextSlot", min_context_slot)
-            .build()
-        )
-        response = self._send(request)
-        context = response["result"]["context"]
-        value = response["result"]["value"]
-        return context, value
-
     def get_vote_accounts(
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
@@ -848,6 +830,24 @@ class HeliusClient:
         current = ta.validate_python(response["result"]["current"])
         delinquent = ta.validate_python(response["result"]["delinquent"])
         return current, delinquent
+
+    def is_blockhash_valid(
+        self,
+        blockhash: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        min_context_slot: int | None = None,
+    ) -> tuple[dict, bool]:
+        request = (
+            RpcRequest(method="isBlockhashValid")
+            .add(blockhash)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        context = response["result"]["context"]
+        value = response["result"]["value"]
+        return context, value
 
 
 class RpcRequest:
