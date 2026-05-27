@@ -170,6 +170,19 @@ class TokenSupply(BaseModel):
     ui_amount_string: str
 
 
+class VotingAccount(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    vote_pubkey: str
+    node_pubkey: str
+    activated_stake: int
+    epoch_vote_account: bool
+    commission: int
+    last_vote: int
+    root_slot: int
+    epoch_credits: list[list[int]]
+
+
 class TransactionMetadata(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 

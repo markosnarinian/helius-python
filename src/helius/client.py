@@ -22,6 +22,7 @@ from helius.models import (
     TokenSupply,
     Transaction,
     TransactionSignature,
+    VotingAccount,
 )
 
 
@@ -808,6 +809,27 @@ class HeliusClient:
         response = self._send(request)
         result = response["result"]
         return result["solana-core"], result["feature-set"]
+
+    def get_vote_accounts(
+        self,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        vote_pubkey: str | None = None,
+        keep_unstaked_delinquents: bool | None = None,
+        delinquent_slot_distance: int | None = None,
+    ) -> tuple[list[VotingAccount], list[VotingAccount]]:
+        request = (
+            RpcRequest(method="getVoteAccounts")
+            .set("commitment", commitment)
+            .set("votePubkey", vote_pubkey)
+            .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
+            .set("delinquentSlotDistance", delinquent_slot_distance)
+            .build()
+        )
+        response = self._send(request)
+        ta = TypeAdapter(list[VotingAccount])
+        current = ta.validate_python(response["result"]["current"])
+        delinquent = ta.validate_python(response["result"]["delinquent"])
+        return current, delinquent
 
 
 class RpcRequest:
