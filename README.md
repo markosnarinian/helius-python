@@ -9,17 +9,21 @@ wraps it.
 
 That includes:
 
-- **The full Solana JSON-RPC surface** proxied by Helius — `getAccountInfo`,
+- ✅ **The full Solana JSON-RPC surface** proxied by Helius — `getAccountInfo`,
   `getBalance`, `getBlock`, `getTransaction`, `getProgramAccounts`,
   `getTokenAccountsByOwner`, `getSignaturesForAddress`, and every other
-  standard RPC method.
-- **All Helius-specific RPC extensions** — enhanced transactions, DAS
+  standard RPC method. **(supported today)**
+- 🚧 **All Helius-specific RPC extensions** — enhanced transactions, DAS
   (Digital Asset Standard) methods, priority fee estimation, and the rest of
-  the Helius-only RPC namespace.
-- **Every Helius REST endpoint** — Enhanced Transactions API, Webhooks API,
-  Mint API, token metadata, address lookups, and beyond.
-- **Platform features** — streaming, websockets, and any new capability
-  Helius adds to its API.
+  the Helius-only RPC namespace. **(in progress)**
+- 🚧 **Every Helius REST endpoint** — Enhanced Transactions API, Webhooks API,
+  Mint API, token metadata, address lookups, and beyond. **(in progress)**
+- 🚧 **Platform features** — streaming, websockets, and any new capability
+  Helius adds to its API. **(in progress)**
+
+> **Current status:** only the standard Solana JSON-RPC surface is implemented
+> today. Support for Helius RPC extensions, REST endpoints, and platform
+> features is actively being worked on.
 
 Every method has typed parameters, typed return values, and dedicated model
 classes built on `pydantic`, so you get full editor autocomplete and static
