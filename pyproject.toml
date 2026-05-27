@@ -33,3 +33,6 @@ dev = [
   "pytest",
   "respx",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/helius"]
