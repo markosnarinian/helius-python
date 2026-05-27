@@ -105,6 +105,12 @@ basedpyright src
 Make sure your change at least imports cleanly and the method you added
 actually works against a real Helius endpoint.
 
+Run the test suite with the local `src` package on the import path:
+
+```bash
+PYTHONPATH=src .venv/bin/pytest
+```
+
 ## Pull Requests
 
 - Keep PRs focused. One method, one bug fix, or one refactor per PR.
