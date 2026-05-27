@@ -433,6 +433,50 @@ class HeliusClient:
         return accounts
 
     @validate_call
+    def get_program_accounts(
+        self,
+        program_id: str,
+        commitment: Literal["confirmed", "finalized", "processed"] | None = None,
+        min_context_slot: int | None = None,
+        with_context: bool | None = None,
+        encoding: (
+            Literal["jsonParsed", "base58", "base64", "base64+zstd"] | None
+        ) = None,
+        data_slice_offset: int | None = None,
+        data_slice_length: int | None = None,
+        changed_since_slot: int | None = None,
+        filters: list[dict] | None = None,
+    ) -> list[tuple[str, Account]]:
+        if (data_slice_offset is None) != (data_slice_length is None):
+            raise ValueError(
+                "Set both data_slice_length and data_slice_offset or neither."
+            )
+        request = (
+            RpcRequest(method="getProgramAccounts")
+            .add(program_id)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .set("withContext", with_context)
+            .set("encoding", encoding)
+            .set(
+                "dataSlice",
+                (
+                    {"offset": data_slice_offset, "length": data_slice_length}
+                    if data_slice_offset is not None and data_slice_length is not None
+                    else None
+                ),
+            )
+            .set("changed_since_slot", changed_since_slot)
+            .set("filters", filters)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        return [(i["pubkey"], Account.model_validate(i["account"])) for i in result]
+
+    # TODO: use getProgramAccountsV2 which supports pagination
+
+    @validate_call
     def get_signatures_for_address(
         self,
         address: str,
