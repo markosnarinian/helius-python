@@ -90,10 +90,16 @@ Rules:
 - Do NOT copy-paste large chunks from the Helius docs. Summarize and link.
 - Examples (`Example:` section) are encouraged for methods with non-trivial argument combinations (e.g. `get_block_production`, `get_token_accounts_by_owner`), optional for everything else.
 
+## Implementation conventions
+
+- **If the RPC returns an `RpcResponse` wrapper (`{context, value}`), the Python method MUST return `(context, value)`** — never silently drop `context`. For methods whose `value` is itself a small composite, flatten the tuple (e.g. `get_latest_blockhash` returns `tuple[dict, str, int]`, not `tuple[dict, tuple[str, int]]`). Check the upstream Helius API reference page to see whether the response is wrapped.
+- Type-annotate the return shape exactly. `tuple[dict, X]`, not bare `tuple`, and not the unwrapped `X`. Mismatches between annotation and runtime shape break the docstring contract.
+- `value` can be `null` for some wrapped methods (e.g. `getAccountInfo` when the account doesn't exist, `getMultipleAccounts` entries for closed accounts). Reflect that in the return type with `| None` and handle it before calling `Model.model_validate(...)`.
+
 ## Checklist for adding a new client method
 
 1. Read both Helius doc URLs for the RPC method (see the top of this file).
-2. Implement the method.
+2. Implement the method, following the **Implementation conventions** above — in particular, return `(context, value)` if the upstream response is wrapped.
 3. Add a docstring with `Args`, `Returns`, `Raises` (if any), `Note` (if any), and `See Also` with both Helius URLs.
 4. Add the method to the "Supported methods" table in `README.md`.
 5. Add tests per the Testing section.
