@@ -17,6 +17,7 @@ from helius.models import (
     PerformanceSample,
     SignatureStatus,
     Supply,
+    TokenAccount,
     TokenAccountBalance,
     TransactionSignature,
 )
@@ -624,7 +625,7 @@ class HeliusClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> TokenAccountBalance:
         request = (
-            RpcRequest(method="getTokenAccountBalance")
+            RpcRequest(method="getTokenTokenAccountBalance")
             .add(token_account)
             .set("commitment", commitment)
             .build()
@@ -644,7 +645,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> list[dict]:
+    ) -> list[tuple[str, Account]]:
         if (mint is None) == (program_id is None):
             raise ValueError("Provide exactly one of mint or program_id.")
         if (data_slice_offset is None) != (data_slice_length is None):
@@ -674,7 +675,11 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        return response["result"]["value"]
+        token_accounts = [
+            (i["pubkey"], Account.model_validate(i["account"]))
+            for i in response["result"]["value"]
+        ]
+        return token_accounts
 
     def get_token_accounts_by_owner(
         self,
@@ -688,7 +693,7 @@ class HeliusClient:
         data_slice_offset: int | None = None,
         data_slice_length: int | None = None,
         min_context_slot: int | None = None,
-    ) -> list[dict]:
+    ) -> list[tuple[str, Account]]:
         if (mint is None) == (program_id is None):
             raise ValueError("Provide exactly one of mint or program_id.")
         if (data_slice_offset is None) != (data_slice_length is None):
@@ -718,9 +723,30 @@ class HeliusClient:
             .build()
         )
         response = self._send(request)
-        return response["result"]["value"]
+        token_accounts = [
+            (i["pubkey"], Account.model_validate(i["account"]))
+            for i in response["result"]["value"]
+        ]
+        return token_accounts
 
     # TODO: use getTokenAccountsByOwnerV2 and do pagination
+
+    def get_token_largest_accounts(
+        self,
+        mint: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> tuple[dict, list[TokenAccount]]:
+        request = (
+            RpcRequest(method="getTokenLargestAccounts")
+            .add(mint)
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        context = response["result"]["context"]
+        ta = TypeAdapter(list[TokenAccount])
+        largest_accounts = ta.validate_python(response["result"]["value"])
+        return context, largest_accounts
 
 
 class RpcRequest:
