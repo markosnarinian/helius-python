@@ -1,0 +1,1 @@
+When implementing a function for a RPC method in the HeliusClient class, read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
