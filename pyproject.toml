@@ -6,9 +6,9 @@ profile = "black"
 
 [build-system]
 requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
 
 [project]
-build-backend = "hatchling.build"
 name = "helius-python"
 version = "0.0.1"
 authors = [
