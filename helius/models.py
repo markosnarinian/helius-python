@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
@@ -104,9 +106,7 @@ class PerformanceSample(BaseModel):
     num_slots: int
 
 
-# TODO: consider creating an account details composite model
-# HACK: Simply return a tuple
-class LargestAccount(BaseModel):
+class LamportAccount(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
     address: str
@@ -168,3 +168,26 @@ class TokenSupply(BaseModel):
     decimals: int
     ui_amount: float | None
     ui_amount_string: str
+
+
+class TransactionMetadata(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    err: dict | None
+    fee: int
+    pre_balances: list[int]
+    post_balances: list[int]
+    pre_token_balances: list[dict] | None
+    post_token_balances: list[dict] | None
+    inner_instructions: list[dict] | None
+    log_messages: list[str] | None
+
+
+class Transaction(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    slot: int
+    block_time: int | None
+    meta: TransactionMetadata | None
+    transaction: dict | list
+    version: Literal["legacy"] | int | None = None

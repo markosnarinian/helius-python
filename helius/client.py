@@ -13,13 +13,14 @@ from helius.models import (
     EpochSchedule,
     InflationGovernor,
     InflationRate,
-    LargestAccount,
+    LamportAccount,
     PerformanceSample,
     SignatureStatus,
     Supply,
     TokenAccount,
     TokenAccountBalance,
     TokenSupply,
+    Transaction,
     TransactionSignature,
 )
 
@@ -28,6 +29,7 @@ class HeliusClient:
     # BUG: check which endpoints return meaningful data in context
     # BUG: handle helius errors that do not show by HTTP response code
     # TODO: check all http methods and all guides and implement pagination and other non-implemented features
+    # TODO: consider refactoring | None = None to Optional[] = None
     def __init__(
         self,
         *,
@@ -333,7 +335,7 @@ class HeliusClient:
         self,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         filter: Literal["circulating", "nonCirculating"] | None = None,
-    ) -> list[LargestAccount]:
+    ) -> list[LamportAccount]:
         request = (
             RpcRequest(method="getLargestAccounts")
             .set("commitment", commitment)
@@ -342,7 +344,7 @@ class HeliusClient:
         )
         response = self._send(request)
         value = response["result"]["value"]
-        ta = TypeAdapter(list[LargestAccount])
+        ta = TypeAdapter(list[LamportAccount])
         largest_accounts = ta.validate_python(value)
         return largest_accounts
 
@@ -764,6 +766,25 @@ class HeliusClient:
         context = response["result"]["context"]
         token_supply = TokenSupply.model_validate(response["result"]["value"])
         return context, token_supply
+
+    def get_transaction(
+        self,
+        transaction_signature: str,
+        commitment: Literal["finalized", "confirmed"] | None = None,
+        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
+        max_supported_transaction_version: int | None = None,
+    ) -> Transaction:
+        request = (
+            RpcRequest(method="getTransaction")
+            .add(transaction_signature)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
+            .build()
+        )
+        response = self._send(request)
+        transaction = Transaction.model_validate(response["result"])
+        return transaction
 
 
 class RpcRequest:
