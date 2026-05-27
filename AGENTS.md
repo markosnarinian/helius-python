@@ -169,7 +169,7 @@ Skeleton:
 import json
 import httpx
 import respx
-from helius import HeliusClient
+from helius.client import HeliusClient
 
 @respx.mock
 def test_get_balance():

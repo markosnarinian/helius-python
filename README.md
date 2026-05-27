@@ -44,12 +44,21 @@ type checking.
 pip install helius-python
 ```
 
+This installs the runtime dependencies automatically:
+
+- `httpx` for HTTP transport
+- `pydantic` for typed response models and argument validation
+- `python-dotenv` for optional `.env` loading of `HELIUS_API_KEY`
+
+You do not need to install these separately unless your environment disables
+dependency installation.
+
 ## Authentication
 
 Pass your Helius API key explicitly:
 
 ```python
-from helius import HeliusClient
+from helius.client import HeliusClient
 
 client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
 ```
@@ -62,7 +71,7 @@ HELIUS_API_KEY=your_helius_api_key
 ```
 
 ```python
-from helius import HeliusClient
+from helius.client import HeliusClient
 
 client = HeliusClient()  # reads HELIUS_API_KEY from .env
 ```
@@ -72,7 +81,7 @@ client = HeliusClient()  # reads HELIUS_API_KEY from .env
 ### As a context manager (recommended)
 
 ```python
-from helius import HeliusClient
+from helius.client import HeliusClient
 
 with HeliusClient(api_key="YOUR_HELIUS_API_KEY") as client:
     balance = client.get_balance("So11111111111111111111111111111111111111112")
@@ -92,7 +101,7 @@ If a `with` block doesn't fit your code structure (e.g. the client lives on
 a long-lived object), call `close()` yourself when you're done:
 
 ```python
-from helius import HeliusClient
+from helius.client import HeliusClient
 
 client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
 try:
@@ -190,7 +199,7 @@ docstring that is the source of truth for that symbol. You can read it
 straight from a REPL:
 
 ```python
-from helius import HeliusClient
+from helius.client import HeliusClient
 help(HeliusClient.get_balance)
 ```
 
