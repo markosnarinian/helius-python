@@ -19,6 +19,7 @@ from helius.models import (
     Supply,
     TokenAccount,
     TokenAccountBalance,
+    TokenSupply,
     TransactionSignature,
 )
 
@@ -747,6 +748,22 @@ class HeliusClient:
         ta = TypeAdapter(list[TokenAccount])
         largest_accounts = ta.validate_python(response["result"]["value"])
         return context, largest_accounts
+
+    def get_token_supply(
+        self,
+        mint_address: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> tuple[dict, TokenSupply]:
+        request = (
+            RpcRequest(method="getTokenSupply")
+            .add(mint_address)
+            .set("commitment", commitment)
+            .build()
+        )
+        response = self._send(request)
+        context = response["result"]["context"]
+        token_supply = TokenSupply.model_validate(response["result"]["value"])
+        return context, token_supply
 
 
 class RpcRequest:

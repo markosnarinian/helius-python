@@ -159,3 +159,12 @@ class TokenAccount(BaseModel):
     decimals: int
     ui_amount: float | None
     ui_amount_string: str
+
+
+class TokenSupply(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    amount: str
+    decimals: int
+    ui_amount: float | None
+    ui_amount_string: str
