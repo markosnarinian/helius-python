@@ -59,8 +59,7 @@ class HeliusClient:
         self._client.close()
 
     def _send(self, json: dict, method="POST", url="/") -> dict:
-        request = httpx.Request(method=method, url=url, json=json)
-        response = self._client.send(request)
+        response = self._client.request(method=method, url=url, json=json)
         response.raise_for_status()
         return response.json()
 
