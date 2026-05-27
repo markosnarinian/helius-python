@@ -2,17 +2,6 @@ from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 
 
-class TransactionSignature(BaseModel):
-    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
-
-    signature: str
-    slot: int
-    err: dict | None
-    memo: str | None
-    block_time: int | None
-    confirmation_status: str | None
-
-
 class Account(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
@@ -130,6 +119,17 @@ class SignatureStatus(BaseModel):
     slot: int
     confirmations: int | None
     err: dict | None
+    confirmation_status: str | None
+
+
+class TransactionSignature(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    signature: str
+    slot: int
+    err: dict | None
+    memo: str | None
+    block_time: int | None
     confirmation_status: str | None
 
 
