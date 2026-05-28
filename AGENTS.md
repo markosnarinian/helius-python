@@ -1,84 +1,3 @@
-When implementing a function for a RPC method in the SolanaRpcClient class, read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
-
-# API Reference
-
-The API reference is generated from **Google-style docstrings** on every public symbol in `src/helius/`. Whenever you add or modify a public method, model, or class, you MUST write or update its docstring following the rules below. The README's "Supported methods" table is a quick index only — the docstring is the source of truth.
-
-## Where docstrings live
-
-- **Client methods** (`SolanaRpcClient.get_*`, `is_*`, `request_*`, etc.) — every public method gets a docstring. Private methods (`_send`, dunders) do not need one.
-- **Models** (`src/helius/models.py`) — every public model class gets a docstring describing what it represents. Individual fields don't need per-field docstrings if their names and types are self-explanatory; only document fields where the meaning, units, or nullability isn't obvious from the type alone.
-- **Builders / helpers** (`RpcRequest`) — class docstring describing purpose, plus one-line docstrings on each public method.
-
-## Client method docstring format
-
-Use Google-style sections. Order matters; omit any section that doesn't apply.
-
-```python
-def method_name(self, ...) -> ReturnType:
-    """One-line summary in the imperative mood, ending with a period.
-
-    Optional longer description: a paragraph or two on what the method does,
-    when to use it, and any non-obvious behavior. Keep this short — link to
-    the upstream Helius docs rather than restating them.
-
-    Args:
-        param_one: Description of the first parameter, including units
-            (lamports vs. SOL, slot vs. block height) when relevant. Mention
-            the upstream JSON field name only if it differs in a non-obvious
-            way from the snake_case Python name.
-        param_two: Description. Note constraints like "must be base-58
-            encoded" or "max 500_000 slots from `start_slot`".
-        commitment: Optional commitment level. Defaults to the node's default
-            when omitted.
-
-    Returns:
-        Describe the return shape. For tuples, describe each element in
-        order. For models, name the model and what it represents. For
-        primitives, name the unit (e.g. "Balance in lamports.").
-
-    Raises:
-        ValueError: When the arguments violate the documented constraints
-            (e.g. mutually exclusive params, mismatched pairs).
-
-    Note:
-        Only available on Devnet and Testnet, not Mainnet Beta.
-
-    See Also:
-        - Helius guide: https://www.helius.dev/docs/rpc/guides/<method>
-        - Helius API reference: https://www.helius.dev/docs/api-reference/rpc/http/<method>
-    """
-```
-
-Rules:
-
-- **Summary line** is one sentence, imperative mood, ≤ 88 chars, ends with a period. Example: `"Return the SOL balance of an account in lamports."`
-- **`Args:`** documents every parameter, even `commitment` and `min_context_slot`. One entry per param. Don't re-state the type — basedpyright already shows it.
-- **`Returns:`** is mandatory unless the method returns `None`.
-- **`Raises:`** is required if the method calls `raise` directly. Don't document exceptions that bubble up from `httpx` — those are covered by the library-wide error-handling docs.
-- **`Note:`** for network restrictions, version requirements, pagination limits, deprecation warnings, etc. One section per concern.
-- **`See Also:`** ALWAYS includes the Helius guide and API reference URLs for the underlying RPC method. This is the contract for an RPC wrapper — the docstring tells you what we do, the upstream docs tell you what the network does.
-- Keep prose tight. The docstring should be readable in `help(client.method)` without scrolling forever.
-
-## Model docstring format
-
-```python
-class Supply(BaseModel):
-    """Total, circulating, and non-circulating SOL supply, in lamports.
-
-    Returned as the `value` field of `getSupply`. All amounts are in
-    lamports (1 SOL = 1_000_000_000 lamports).
-
-    See Also:
-        - Helius API reference: https://www.helius.dev/docs/api-reference/rpc/http/getsupply
-    """
-    ...
-```
-
-Rules:
-
-- One-line summary + optional paragraph + `See Also:` linking the upstream docs that define the shape.
-- If a field has surprising semantics (e.g. `ui_amount` can be `None` when the mint has too many decimals, `non_circulating_accounts` is only populated when not excluded), document it inline with `Field(..., description="...")` or in the class docstring.
 
 ## Conventions
 
@@ -98,7 +17,7 @@ Rules:
 
 ## Checklist for adding a new client method
 
-1. Read both Helius doc URLs for the RPC method (see the top of this file).
+1. Read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
 2. Implement the method, following the **Implementation conventions** above — in particular, return `(context, value)` if the upstream response is wrapped.
 3. Add a docstring with `Args`, `Returns`, `Raises` (if any), `Note` (if any), and `See Also` with both Helius URLs.
 4. Add the method to the "Supported methods" table in `README.md`.
