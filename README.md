@@ -138,8 +138,8 @@ from helius.client import HeliusClient
 
 client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
 try:
-    context, balance = client.get_balance("So11111111111111111111111111111111111111112")
-    context, supply  = client.get_supply()
+    _ctx, balance = client.get_balance("So11111111111111111111111111111111111111112")
+    _ctx, supply  = client.get_supply()
 finally:
     client.close()
 ```
