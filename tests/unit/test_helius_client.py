@@ -64,7 +64,7 @@ def test_get_account_info():
     route = mock_rpc({"context": {"slot": 341197053}, "value": ACCOUNT_VALUE})
     with HeliusClient(api_key="test") as client:
         context, account = client.get_account_info(
-            "Acct",
+            public_key="Acct",
             encoding="base64",
             data_slice_offset=0,
             data_slice_length=8,
@@ -88,7 +88,7 @@ def test_get_account_info():
 def test_get_account_info_minimal():
     route = mock_rpc({"context": {"slot": 1}, "value": ACCOUNT_VALUE})
     with HeliusClient(api_key="test") as client:
-        context, account = client.get_account_info("Acct")
+        context, account = client.get_account_info(public_key="Acct")
     assert context == {"slot": 1}
     assert account is not None
     assert body(route)["params"] == ["Acct"]
@@ -99,7 +99,7 @@ def test_get_account_info_minimal():
 def test_get_account_info_null_account():
     route = mock_rpc({"context": {"slot": 1}, "value": None})
     with HeliusClient(api_key="test") as client:
-        context, account = client.get_account_info("Acct")
+        context, account = client.get_account_info(public_key="Acct")
     assert context == {"slot": 1}
     assert account is None
     assert_api_key(route)
@@ -108,7 +108,7 @@ def test_get_account_info_null_account():
 def test_get_account_info_validates_data_slice_pair():
     with HeliusClient(api_key="test") as client:
         with pytest.raises(ValueError, match="Set both"):
-            client.get_account_info("Acct", data_slice_offset=0)
+            client.get_account_info(public_key="Acct", data_slice_offset=0)
 
 
 # ---------------------------------------------------------------------------
@@ -120,7 +120,7 @@ def test_get_account_info_validates_data_slice_pair():
 def test_get_balance():
     route = mock_rpc({"context": {"slot": 1}, "value": 42})
     with HeliusClient(api_key="test") as client:
-        assert client.get_balance("Acct", commitment="finalized") == ({"slot": 1}, 42)
+        assert client.get_balance(public_key="Acct", commitment="finalized") == ({"slot": 1}, 42)
     assert body(route)["method"] == "getBalance"
     assert body(route)["params"] == ["Acct", {"commitment": "finalized"}]
     assert_api_key(route)
@@ -130,7 +130,7 @@ def test_get_balance():
 def test_get_balance_minimal():
     route = mock_rpc({"context": {"slot": 1}, "value": 0})
     with HeliusClient(api_key="test") as client:
-        context, value = client.get_balance("Acct")
+        context, value = client.get_balance(public_key="Acct")
     assert context == {"slot": 1}
     assert value == 0
     assert body(route)["params"] == ["Acct"]
@@ -156,7 +156,7 @@ def test_get_block():
         }
     )
     with HeliusClient(api_key="test") as client:
-        block = client.get_block(429, commitment="finalized", rewards=True)
+        block = client.get_block(slot=429, commitment="finalized", rewards=True)
     assert block.blockhash == "DUCT8VSgk2BXkMhQfxKVYfikEZCQf4dZ4ioPdGdaVxMN"
     assert block.rewards == []
     assert body(route)["method"] == "getBlock"
@@ -177,7 +177,7 @@ def test_get_block_minimal():
         }
     )
     with HeliusClient(api_key="test") as client:
-        block = client.get_block(429)
+        block = client.get_block(slot=429)
     assert block.blockhash == "DUCT8VSgk2BXkMhQfxKVYfikEZCQf4dZ4ioPdGdaVxMN"
     assert body(route)["params"] == [429]
     assert_api_key(route)
@@ -192,7 +192,7 @@ def test_get_block_minimal():
 def test_get_block_commitment():
     route = mock_rpc({"commitment": [0, 0, 0, 0, 0, 10, 32], "totalStake": 384962848972206900})
     with HeliusClient(api_key="test") as client:
-        result = client.get_block_commitment(1)
+        result = client.get_block_commitment(slot=1)
     assert result.commitment == [0, 0, 0, 0, 0, 10, 32]
     assert result.total_stake == 384962848972206900
     assert body(route)["method"] == "getBlockCommitment"
@@ -294,7 +294,7 @@ def test_get_block_production_validates_required_range_inputs():
 def test_get_blocks():
     route = mock_rpc([5, 6, 7, 8, 9, 10])
     with HeliusClient(api_key="test") as client:
-        assert client.get_blocks(5, 10, commitment="finalized") == [5, 6, 7, 8, 9, 10]
+        assert client.get_blocks(start_slot=5, end_slot=10, commitment="finalized") == [5, 6, 7, 8, 9, 10]
     assert body(route)["method"] == "getBlocks"
     assert body(route)["params"] == [5, 10, {"commitment": "finalized"}]
     assert_api_key(route)
@@ -304,7 +304,7 @@ def test_get_blocks():
 def test_get_blocks_no_end_slot():
     route = mock_rpc([1, 2])
     with HeliusClient(api_key="test") as client:
-        assert client.get_blocks(1, None) == [1, 2]
+        assert client.get_blocks(start_slot=1, end_slot=None) == [1, 2]
     assert body(route)["params"] == [1]
     assert_api_key(route)
 
@@ -318,7 +318,7 @@ def test_get_blocks_no_end_slot():
 def test_get_blocks_with_limit():
     route = mock_rpc([1, 2])
     with HeliusClient(api_key="test") as client:
-        assert client.get_blocks_with_limit(1, 2) == [1, 2]
+        assert client.get_blocks_with_limit(start_slot=1, limit=2) == [1, 2]
     assert body(route)["method"] == "getBlocksWithLimit"
     assert body(route)["params"] == [1, 2]
     assert_api_key(route)
@@ -333,7 +333,7 @@ def test_get_blocks_with_limit():
 def test_get_block_time():
     route = mock_rpc(1574721591)
     with HeliusClient(api_key="test") as client:
-        assert client.get_block_time(1) == 1574721591
+        assert client.get_block_time(slot=1) == 1574721591
     assert body(route)["method"] == "getBlockTime"
     assert body(route)["params"] == [1]
     assert_api_key(route)
@@ -429,7 +429,7 @@ def test_get_epoch_schedule():
 def test_get_fee_for_message():
     route = mock_rpc({"context": {"slot": 5068}, "value": 5000})
     with HeliusClient(api_key="test") as client:
-        assert client.get_fee_for_message("msg", commitment="processed") == (
+        assert client.get_fee_for_message(message="msg", commitment="processed") == (
             {"slot": 5068},
             5000,
         )
@@ -707,7 +707,7 @@ def test_get_max_shred_insert_slot():
 def test_get_minimum_balance_for_rent_exemption():
     route = mock_rpc(500)
     with HeliusClient(api_key="test") as client:
-        assert client.get_minimum_balance_for_rent_exemption(128) == 500
+        assert client.get_minimum_balance_for_rent_exemption(data_length=128) == 500
     assert body(route)["method"] == "getMinimumBalanceForRentExemption"
     assert body(route)["params"] == [128]
     assert_api_key(route)
@@ -724,9 +724,7 @@ def test_get_multiple_accounts():
     # Will FAIL until client.py:449-450 is fixed to send dataSlice as a nested object.
     route = mock_rpc({"context": {"slot": 341197247}, "value": [ACCOUNT_VALUE]})
     with HeliusClient(api_key="test") as client:
-        context, accounts = client.get_multiple_accounts(
-            ["Acct"], encoding="base64", data_slice_offset=0, data_slice_length=8
-        )
+        context, accounts = client.get_multiple_accounts(pubkeys=["Acct"], encoding="base64", data_slice_offset=0, data_slice_length=8)
     assert context == {"slot": 341197247}
     assert accounts[0].rent_epoch == 18446744073709551615
     assert body(route)["method"] == "getMultipleAccounts"
@@ -741,7 +739,7 @@ def test_get_multiple_accounts():
 def test_get_multiple_accounts_null_entry():
     route = mock_rpc({"context": {"slot": 1}, "value": [ACCOUNT_VALUE, None]})
     with HeliusClient(api_key="test") as client:
-        context, accounts = client.get_multiple_accounts(["Acct1", "Acct2"])
+        context, accounts = client.get_multiple_accounts(pubkeys=["Acct1", "Acct2"])
     assert context == {"slot": 1}
     assert isinstance(accounts[0], Account)
     assert accounts[1] is None
@@ -751,10 +749,10 @@ def test_get_multiple_accounts_null_entry():
 def test_get_multiple_accounts_validates_data_slice():
     with HeliusClient(api_key="test") as client:
         with pytest.raises(ValueError, match="Set both"):
-            client.get_multiple_accounts(["Acct"], data_slice_offset=0)
+            client.get_multiple_accounts(pubkeys=["Acct"], data_slice_offset=0)
         with pytest.raises(ValueError, match="Data slice"):
             client.get_multiple_accounts(
-                ["Acct"],
+                pubkeys=["Acct"],
                 encoding="jsonParsed",
                 data_slice_offset=0,
                 data_slice_length=8,
@@ -777,9 +775,7 @@ def test_get_program_accounts():
         ]
     )
     with HeliusClient(api_key="test") as client:
-        accounts = client.get_program_accounts(
-            "Program", encoding="base64", data_slice_offset=0, data_slice_length=8
-        )
+        accounts = client.get_program_accounts(program_id="Program", encoding="base64", data_slice_offset=0, data_slice_length=8)
     assert accounts[0][0] == "CxELquR1gPP8wHe33gZ4QxqGB3sZ9RSwsJ2KshVewkFY"
     assert body(route)["method"] == "getProgramAccounts"
     assert body(route)["params"] == [
@@ -792,7 +788,7 @@ def test_get_program_accounts():
 def test_get_program_accounts_validates_data_slice_pair():
     with HeliusClient(api_key="test") as client:
         with pytest.raises(ValueError, match="Set both"):
-            client.get_program_accounts("Program", data_slice_offset=0)
+            client.get_program_accounts(program_id="Program", data_slice_offset=0)
 
 
 # ---------------------------------------------------------------------------
@@ -831,7 +827,7 @@ def test_get_recent_performance_samples():
 def test_get_recent_prioritization_fees():
     route = mock_rpc([{"slot": 348125, "prioritizationFee": 1234}])
     with HeliusClient(api_key="test") as client:
-        assert client.get_recent_prioritization_fees(["Acct"]) == [(348125, 1234)]
+        assert client.get_recent_prioritization_fees(locked_writable_accounts=["Acct"]) == [(348125, 1234)]
     assert body(route)["method"] == "getRecentPrioritizationFees"
     assert body(route)["params"] == [["Acct"]]
     assert_api_key(route)
@@ -866,7 +862,7 @@ def test_get_signatures_for_address():
         ]
     )
     with HeliusClient(api_key="test") as client:
-        signatures = client.get_signatures_for_address("Addr", limit=1, before="before")
+        signatures = client.get_signatures_for_address(address="Addr", limit=1, before="before")
     assert signatures[0].signature.startswith("5h6x")
     assert signatures[0].confirmation_status == "finalized"
     assert body(route)["method"] == "getSignaturesForAddress"
@@ -878,7 +874,7 @@ def test_get_signatures_for_address():
 def test_get_signatures_for_address_sends_default_limit():
     route = mock_rpc([])
     with HeliusClient(api_key="test") as client:
-        client.get_signatures_for_address("Addr")
+        client.get_signatures_for_address(address="Addr")
     assert body(route)["params"] == ["Addr", {"limit": 1000}]
     assert_api_key(route)
 
@@ -905,9 +901,7 @@ def test_get_signature_statuses():
         }
     )
     with HeliusClient(api_key="test") as client:
-        context, statuses = client.get_signature_statuses(
-            ["sig"], search_transaction_history=True
-        )
+        context, statuses = client.get_signature_statuses(signatures=["sig"], search_transaction_history=True)
     assert context == {"slot": 82}
     assert statuses[0].confirmation_status == "finalized"
     assert statuses[0].confirmations == 48
@@ -959,7 +953,7 @@ def test_get_slot_leader():
 def test_get_slot_leaders():
     route = mock_rpc(["ChorusmmK7i1AxXeiTtQgQZhQNiXYU84ULeaYF1EH15n"])
     with HeliusClient(api_key="test") as client:
-        assert client.get_slot_leaders(1, 2) == [
+        assert client.get_slot_leaders(start_slot=1, limit=2) == [
             "ChorusmmK7i1AxXeiTtQgQZhQNiXYU84ULeaYF1EH15n"
         ]
     assert body(route)["method"] == "getSlotLeaders"
@@ -1028,7 +1022,7 @@ def test_get_supply():
 def test_get_token_account_balance():
     route = mock_rpc({"context": {"slot": 1114}, "value": TOKEN_BALANCE_VALUE})
     with HeliusClient(api_key="test") as client:
-        context, balance = client.get_token_account_balance("TokenAcct")
+        context, balance = client.get_token_account_balance(token_account="TokenAcct")
     assert context == {"slot": 1114}
     assert balance.ui_amount == 98.64
     assert balance.amount == "9864"
@@ -1051,9 +1045,7 @@ def test_get_token_accounts_by_delegate():
         }
     )
     with HeliusClient(api_key="test") as client:
-        context, accounts = client.get_token_accounts_by_delegate(
-            "Delegate", program_id="Program"
-        )
+        context, accounts = client.get_token_accounts_by_delegate(delegate_pub_key="Delegate", program_id="Program")
     assert context == {"slot": 1114}
     assert accounts[0][0] == "TokenAcct"
     assert body(route)["method"] == "getTokenAccountsByDelegate"
@@ -1064,18 +1056,14 @@ def test_get_token_accounts_by_delegate():
 def test_get_token_accounts_by_delegate_validates_filters_and_data_slice():
     with HeliusClient(api_key="test") as client:
         with pytest.raises(ValueError, match="exactly one"):
-            client.get_token_accounts_by_delegate("Delegate")
+            client.get_token_accounts_by_delegate(delegate_pub_key="Delegate")
         with pytest.raises(ValueError, match="exactly one"):
-            client.get_token_accounts_by_delegate(
-                "Delegate", mint="Mint", program_id="Program"
-            )
+            client.get_token_accounts_by_delegate(delegate_pub_key="Delegate", mint="Mint", program_id="Program")
         with pytest.raises(ValueError, match="Set both"):
-            client.get_token_accounts_by_delegate(
-                "Delegate", mint="Mint", data_slice_offset=0
-            )
+            client.get_token_accounts_by_delegate(delegate_pub_key="Delegate", mint="Mint", data_slice_offset=0)
         with pytest.raises(ValueError, match="dataSlice"):
             client.get_token_accounts_by_delegate(
-                "Delegate",
+                delegate_pub_key="Delegate",
                 mint="Mint",
                 encoding="jsonParsed",
                 data_slice_offset=0,
@@ -1098,7 +1086,7 @@ def test_get_token_accounts_by_owner():
     )
     with HeliusClient(api_key="test") as client:
         context, accounts = client.get_token_accounts_by_owner(
-            "Owner",
+            owner_pub_key="Owner",
             mint="Mint",
             encoding="jsonParsed",
         )
@@ -1117,18 +1105,14 @@ def test_get_token_accounts_by_owner():
 def test_get_token_accounts_by_owner_validates_filters_and_data_slice():
     with HeliusClient(api_key="test") as client:
         with pytest.raises(ValueError, match="exactly one"):
-            client.get_token_accounts_by_owner("Owner")
+            client.get_token_accounts_by_owner(owner_pub_key="Owner")
         with pytest.raises(ValueError, match="exactly one"):
-            client.get_token_accounts_by_owner(
-                "Owner", mint="Mint", program_id="Program"
-            )
+            client.get_token_accounts_by_owner(owner_pub_key="Owner", mint="Mint", program_id="Program")
         with pytest.raises(ValueError, match="Set both"):
-            client.get_token_accounts_by_owner(
-                "Owner", mint="Mint", data_slice_offset=0
-            )
+            client.get_token_accounts_by_owner(owner_pub_key="Owner", mint="Mint", data_slice_offset=0)
         with pytest.raises(ValueError, match="dataSlice"):
             client.get_token_accounts_by_owner(
-                "Owner",
+                owner_pub_key="Owner",
                 mint="Mint",
                 encoding="jsonParsed",
                 data_slice_offset=0,
@@ -1158,9 +1142,7 @@ def test_get_token_largest_accounts():
         }
     )
     with HeliusClient(api_key="test") as client:
-        context, accounts = client.get_token_largest_accounts(
-            "Mint", commitment="finalized"
-        )
+        context, accounts = client.get_token_largest_accounts(mint="Mint", commitment="finalized")
     assert context == {"slot": 1114}
     assert accounts[0].address == "FYjHNoFtSQ5uijKrZFyYAxvEr87hsKXkXcxkcmkBAf4r"
     assert accounts[0].ui_amount == 7.71
@@ -1178,7 +1160,7 @@ def test_get_token_largest_accounts():
 def test_get_token_supply():
     route = mock_rpc({"context": {"slot": 1114}, "value": TOKEN_BALANCE_VALUE})
     with HeliusClient(api_key="test") as client:
-        context, supply = client.get_token_supply("Mint")
+        context, supply = client.get_token_supply(mint_address="Mint")
     assert context == {"slot": 1114}
     assert supply.amount == "9864"
     assert body(route)["method"] == "getTokenSupply"
@@ -1220,7 +1202,7 @@ def test_get_transaction():
         }
     )
     with HeliusClient(api_key="test") as client:
-        transaction = client.get_transaction("sig", encoding="json")
+        transaction = client.get_transaction(transaction_signature="sig", encoding="json")
     assert transaction.slot == 430
     assert transaction.block_time == 1574721591
     assert transaction.meta.fee == 5000
@@ -1286,7 +1268,7 @@ def test_get_vote_accounts():
 def test_is_blockhash_valid():
     route = mock_rpc({"context": {"slot": 2483}, "value": False})
     with HeliusClient(api_key="test") as client:
-        assert client.is_blockhash_valid("hash") == ({"slot": 2483}, False)
+        assert client.is_blockhash_valid(blockhash="hash") == ({"slot": 2483}, False)
     assert body(route)["method"] == "isBlockhashValid"
     assert body(route)["params"] == ["hash"]
     assert_api_key(route)
@@ -1303,7 +1285,7 @@ def test_request_airdrop():
         "5VERv8NMvzbJMEkV8xnrLkEaWRtSz9CosKDYjCJjBRnbJLgp8uirBgmQpjKhoR4tjF3ZpRzrFmBV6UjKdiSZkQUW"
     )
     with HeliusClient(api_key="test") as client:
-        result = client.request_airdrop("Pubkey", 1, commitment="confirmed")
+        result = client.request_airdrop(public_key="Pubkey", lamports=1, commitment="confirmed")
     assert result.startswith("5VERv8")
     assert body(route)["method"] == "requestAirdrop"
     assert body(route)["params"] == ["Pubkey", 1, {"commitment": "confirmed"}]
