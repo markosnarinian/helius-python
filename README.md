@@ -100,7 +100,7 @@
     <a href="https://github.com/markosnarinian/helius-python/pulls"><img src="https://img.shields.io/github/issues-pr/markosnarinian/helius-python.svg" alt="Open PRs"></a>
   </p>
   
-**A complete, typed Python client for [Helius](https://helius.dev) — the Solana developer platform.** Every JSON-RPC method, typed end-to-end with `pydantic`, no boilerplate.
+**A complete, typed Python client for [Helius](https://helius.dev) — the Solana developer platform.**
 <br />
 
 ## TL;DR
