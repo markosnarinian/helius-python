@@ -137,7 +137,7 @@ wraps it.
 Pass your Helius API key explicitly:
 
 ```python
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 ```
@@ -156,7 +156,7 @@ HELIUS_API_KEY=your_helius_api_key
 ```
 
 ```python
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 client = SolanaRpcClient()  # reads HELIUS_API_KEY from the environment or .env
 ```
@@ -166,7 +166,7 @@ client = SolanaRpcClient()  # reads HELIUS_API_KEY from the environment or .env
 ### As a context manager (recommended)
 
 ```python
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 with SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY") as client:
     _ctx, balance = client.get_balance("So11111111111111111111111111111111111111112")
@@ -186,7 +186,7 @@ If a `with` block doesn't fit your code structure (e.g. the client lives
 on a long-lived object), call `close()` yourself when you're done:
 
 ```python
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 try:
@@ -234,7 +234,7 @@ The method names map 1:1 to the Solana JSON-RPC spec, just converted to
 ## Status
 
 Actively expanding toward full coverage of the Helius API. See
-[`src/helius/client.py`](src/helius/client.py) for the current list of
+[`src/helius/solana_rpc.py`](src/helius/solana_rpc.py) for the current list of
 implemented methods; missing endpoints are tracked as issues and added
 continuously.
 

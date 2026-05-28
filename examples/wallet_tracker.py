@@ -23,7 +23,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 # SPL Token program ID — used to list every token account owned by a wallet.
 TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"

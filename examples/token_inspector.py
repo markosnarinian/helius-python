@@ -22,7 +22,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 
 def main() -> int:

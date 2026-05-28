@@ -21,7 +21,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 

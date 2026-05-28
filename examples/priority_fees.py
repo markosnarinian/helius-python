@@ -25,7 +25,7 @@ import argparse
 import statistics
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 
 def percentile(sorted_values: list[int], pct: float) -> int:

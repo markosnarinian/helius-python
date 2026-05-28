@@ -24,7 +24,7 @@ body:
         your API key.
       render: python
       placeholder: |
-        from helius.client import HeliusClient
+        from helius.solana_rpc import HeliusClient
 
         with HeliusClient(api_key="...") as c:
             c.get_balance(public_key="...")

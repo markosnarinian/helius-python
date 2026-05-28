@@ -1,9 +1,11 @@
-from helius.client import RpcRequest
+from helius.solana_rpc import RpcRequest
 
 
 def test_add_skips_none_unless_allowed():
     assert RpcRequest(method="test").add(None).add("x").build()["params"] == ["x"]
-    assert RpcRequest(method="test").add(None, can_be_none=True).build()["params"] == [None]
+    assert RpcRequest(method="test").add(None, can_be_none=True).build()["params"] == [
+        None
+    ]
 
 
 def test_set_skips_none_unless_allowed():

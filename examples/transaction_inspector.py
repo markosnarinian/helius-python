@@ -19,7 +19,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -50,8 +50,7 @@ def main() -> int:
         return 0
 
     print(
-        f"Fee           : {meta.fee} lamports "
-        f"({meta.fee / LAMPORTS_PER_SOL:.9f} SOL)"
+        f"Fee           : {meta.fee} lamports ({meta.fee / LAMPORTS_PER_SOL:.9f} SOL)"
     )
     print(f"Result        : {'ERROR ' + str(meta.err) if meta.err else 'success'}")
 

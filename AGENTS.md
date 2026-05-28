@@ -123,7 +123,7 @@ tests/
   unit/
     test_rpc_request.py  # RpcRequest builder
     test_models.py       # pydantic model validation against fixtures
-    test_client.py       # one test (or small group) per client method
+    test_solana_rpc.py       # one test (or small group) per client method
 ```
 
 ## Three Layers
@@ -169,7 +169,7 @@ Skeleton:
 import json
 import httpx
 import respx
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 @respx.mock
 def test_get_balance():
@@ -199,7 +199,7 @@ For methods with branching logic (e.g. `get_block_production`, `get_token_accoun
 
 - Construct `SolanaRpcClient` in tests with an explicit `api_key="test"` (or similar). Never rely on a real `.env` file.
 - Use the context-manager form (`with SolanaRpcClient(...) as c:`) in tests so the `httpx.Client` is closed cleanly.
-- Group tests in `tests/unit/test_client.py` by method, but a single file is fine until it grows unwieldy.
+- Group tests in `tests/unit/test_solana_rpc.py` by method, but a single file is fine until it grows unwieldy.
 - Test names should describe the behavior, not the implementation: `test_get_balance_includes_commitment_in_config`, not `test_get_balance_calls_set`.
 - When adding a new client method, the PR must include: (a) a `respx` test asserting the request payload, and (b) a fixture-based model test if the method introduces or uses a model. This is enforced in `CONTRIBUTING.md`.
 

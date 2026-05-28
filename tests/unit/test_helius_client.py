@@ -4,8 +4,8 @@ import httpx
 import pytest
 import respx
 
-from helius.client import SolanaRpcClient
 from helius.models import Account
+from helius.solana_rpc import SolanaRpcClient
 
 ACCOUNT_VALUE = {
     "lamports": 5_000_000_000,
@@ -797,7 +797,7 @@ def test_get_minimum_balance_for_rent_exemption():
 @respx.mock
 def test_get_multiple_accounts():
     # Asserts correct upstream API shape {"dataSlice": {...}}.
-    # Will FAIL until client.py:449-450 is fixed to send dataSlice as a nested object.
+    # Will FAIL until solana_rpc.py:449-450 is fixed to send dataSlice as a nested object.
     route = mock_rpc({"context": {"slot": 341197247}, "value": [ACCOUNT_VALUE]})
     with SolanaRpcClient(api_key="test") as client:
         context, accounts = client.get_multiple_accounts(

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import sys
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -53,8 +53,7 @@ def main() -> int:
     print(f"Total              : {supply.total / LAMPORTS_PER_SOL:>16,.4f} SOL")
     print(f"Circulating        : {supply.circulating / LAMPORTS_PER_SOL:>16,.4f} SOL")
     print(
-        f"Non-circulating    : "
-        f"{supply.non_circulating / LAMPORTS_PER_SOL:>16,.4f} SOL"
+        f"Non-circulating    : {supply.non_circulating / LAMPORTS_PER_SOL:>16,.4f} SOL"
     )
 
     print("\n=== Stake ===\n")
@@ -71,7 +70,7 @@ def main() -> int:
         f"{delinquent_stake / LAMPORTS_PER_SOL:>16,.0f} SOL"
     )
     if total_stake:
-        print(f"Delinquent share   : " f"{100 * delinquent_stake / total_stake:.3f}%")
+        print(f"Delinquent share   : {100 * delinquent_stake / total_stake:.3f}%")
 
     top = sorted(current, key=lambda v: v.activated_stake, reverse=True)[:10]
     print(f"\nTop {len(top)} validators by active stake:")

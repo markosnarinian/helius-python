@@ -24,7 +24,7 @@ import argparse
 import sys
 import time
 
-from helius.client import SolanaRpcClient
+from helius.solana_rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 DEVNET_URL = "https://devnet.helius-rpc.com"
