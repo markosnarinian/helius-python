@@ -29,8 +29,6 @@ from helius.models import (
 
 
 class HeliusClient:
-    # TODO: handle helius errors that do not show by HTTP response code
-    # TODO: check all http methods and all guides and implement pagination and other non-implemented features
     def __init__(
         self,
         *,
