@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Helius RPC documentation
+    url: https://www.helius.dev/docs/rpc
+    about: Questions about Helius RPC behavior, rate limits, or network errors
+      belong upstream — this library is a thin typed wrapper.
+  - name: Solana JSON-RPC documentation
+    url: https://solana.com/docs/rpc
+    about: Reference for the underlying Solana JSON-RPC API.

@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a new RPC method, model, or improvement
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the suggestion! Please describe what you'd like to see
+        added or changed.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve? What's the use case?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: |
+        Describe the API or behavior you'd like. For new RPC methods, please
+        link the upstream Helius docs (both the guide and the API reference
+        pages).
+      placeholder: |
+        Add `HeliusClient.get_foo(...)` wrapping `getFoo`.
+        - Guide: https://www.helius.dev/docs/rpc/guides/getfoo
+        - API reference: https://www.helius.dev/docs/api-reference/rpc/http/getfoo
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Other approaches you considered and why you ruled them out.
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Anything else (related issues, prior art in other libraries).
