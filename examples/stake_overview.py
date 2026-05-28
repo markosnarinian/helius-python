@@ -18,13 +18,13 @@ from __future__ import annotations
 
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
 
 def main() -> int:
-    client = HeliusClient()
+    client = SolanaRpcClient()
     try:
         rate = client.get_inflation_rate()
         gov = client.get_inflation_governor()
@@ -44,35 +44,44 @@ def main() -> int:
     print(f"  initial          : {gov.initial * 100:.2f}%")
     print(f"  terminal         : {gov.terminal * 100:.2f}%")
     print(f"  taper            : {gov.taper * 100:.2f}% per year")
-    print(f"  foundation       : {gov.foundation * 100:.2f}% for "
-          f"{gov.foundation_term:.1f} years")
+    print(
+        f"  foundation       : {gov.foundation * 100:.2f}% for "
+        f"{gov.foundation_term:.1f} years"
+    )
 
     print("\n=== Supply ===\n")
     print(f"Total              : {supply.total / LAMPORTS_PER_SOL:>16,.4f} SOL")
     print(f"Circulating        : {supply.circulating / LAMPORTS_PER_SOL:>16,.4f} SOL")
-    print(f"Non-circulating    : "
-          f"{supply.non_circulating / LAMPORTS_PER_SOL:>16,.4f} SOL")
+    print(
+        f"Non-circulating    : "
+        f"{supply.non_circulating / LAMPORTS_PER_SOL:>16,.4f} SOL"
+    )
 
     print("\n=== Stake ===\n")
     print(f"Minimum delegation : {min_stake / LAMPORTS_PER_SOL:.9f} SOL")
     active_stake = sum(v.activated_stake for v in current)
     delinquent_stake = sum(v.activated_stake for v in delinquent)
     total_stake = active_stake + delinquent_stake
-    print(f"Active validators  : {len(current):>5}  "
-          f"{active_stake / LAMPORTS_PER_SOL:>16,.0f} SOL")
-    print(f"Delinquent         : {len(delinquent):>5}  "
-          f"{delinquent_stake / LAMPORTS_PER_SOL:>16,.0f} SOL")
+    print(
+        f"Active validators  : {len(current):>5}  "
+        f"{active_stake / LAMPORTS_PER_SOL:>16,.0f} SOL"
+    )
+    print(
+        f"Delinquent         : {len(delinquent):>5}  "
+        f"{delinquent_stake / LAMPORTS_PER_SOL:>16,.0f} SOL"
+    )
     if total_stake:
-        print(f"Delinquent share   : "
-              f"{100 * delinquent_stake / total_stake:.3f}%")
+        print(f"Delinquent share   : " f"{100 * delinquent_stake / total_stake:.3f}%")
 
     top = sorted(current, key=lambda v: v.activated_stake, reverse=True)[:10]
     print(f"\nTop {len(top)} validators by active stake:")
     for rank, v in enumerate(top, start=1):
         sol = v.activated_stake / LAMPORTS_PER_SOL
         share = 100 * v.activated_stake / active_stake if active_stake else 0.0
-        print(f"  {rank:>2}. {v.vote_pubkey}  "
-              f"{sol:>14,.0f} SOL  ({share:5.2f}%)  comm={v.commission}%")
+        print(
+            f"  {rank:>2}. {v.vote_pubkey}  "
+            f"{sol:>14,.0f} SOL  ({share:5.2f}%)  comm={v.commission}%"
+        )
 
     return 0
 

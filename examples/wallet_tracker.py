@@ -23,7 +23,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 # SPL Token program ID — used to list every token account owned by a wallet.
 TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
@@ -41,12 +41,14 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    with HeliusClient() as client:  # reads HELIUS_API_KEY from env / .env
+    with SolanaRpcClient() as client:  # reads HELIUS_API_KEY from env / .env
         # --- SOL balance ---------------------------------------------------
         _ctx, lamports = client.get_balance(args.address)
         print(f"\n=== {args.address} ===\n")
-        print(f"SOL balance: {lamports / LAMPORTS_PER_SOL:.9f} SOL "
-              f"({lamports} lamports)\n")
+        print(
+            f"SOL balance: {lamports / LAMPORTS_PER_SOL:.9f} SOL "
+            f"({lamports} lamports)\n"
+        )
 
         # --- SPL token holdings -------------------------------------------
         _ctx, token_accounts = client.get_token_accounts_by_owner(
@@ -77,8 +79,9 @@ def main() -> int:
         print(f"Last {len(sigs)} signatures:")
         for sig in sigs:
             ts = (
-                dt.datetime.fromtimestamp(sig.block_time, tz=dt.timezone.utc)
-                .strftime("%Y-%m-%d %H:%M:%SZ")
+                dt.datetime.fromtimestamp(sig.block_time, tz=dt.timezone.utc).strftime(
+                    "%Y-%m-%d %H:%M:%SZ"
+                )
                 if sig.block_time is not None
                 else "         (no time)         "
             )

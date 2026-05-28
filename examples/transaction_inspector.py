@@ -19,7 +19,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -29,7 +29,7 @@ def main() -> int:
     parser.add_argument("signature", help="Transaction signature (base58)")
     args = parser.parse_args()
 
-    with HeliusClient() as helius:
+    with SolanaRpcClient() as helius:
         tx = helius.get_transaction(
             args.signature,
             encoding="jsonParsed",
@@ -49,8 +49,10 @@ def main() -> int:
         print("\n(no metadata returned)")
         return 0
 
-    print(f"Fee           : {meta.fee} lamports "
-          f"({meta.fee / LAMPORTS_PER_SOL:.9f} SOL)")
+    print(
+        f"Fee           : {meta.fee} lamports "
+        f"({meta.fee / LAMPORTS_PER_SOL:.9f} SOL)"
+    )
     print(f"Result        : {'ERROR ' + str(meta.err) if meta.err else 'success'}")
 
     # Account balance changes ------------------------------------------------

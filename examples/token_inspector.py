@@ -22,7 +22,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 
 def main() -> int:
@@ -30,7 +30,7 @@ def main() -> int:
     parser.add_argument("mint", help="SPL token mint address (base58)")
     args = parser.parse_args()
 
-    client = HeliusClient()
+    client = SolanaRpcClient()
     try:
         _ctx, supply = client.get_token_supply(args.mint)
         _ctx, holders = client.get_token_largest_accounts(args.mint)

@@ -137,9 +137,9 @@ wraps it.
 Pass your Helius API key explicitly:
 
 ```python
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
-client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
+client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 ```
 
 or set `HELIUS_API_KEY` as an environment variable:
@@ -156,9 +156,9 @@ HELIUS_API_KEY=your_helius_api_key
 ```
 
 ```python
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
-client = HeliusClient()  # reads HELIUS_API_KEY from the environment or .env
+client = SolanaRpcClient()  # reads HELIUS_API_KEY from the environment or .env
 ```
 
 ## Usage
@@ -166,9 +166,9 @@ client = HeliusClient()  # reads HELIUS_API_KEY from the environment or .env
 ### As a context manager (recommended)
 
 ```python
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
-with HeliusClient(api_key="YOUR_HELIUS_API_KEY") as client:
+with SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY") as client:
     _ctx, balance = client.get_balance("So11111111111111111111111111111111111111112")
     _ctx, supply  = client.get_supply()
     nodes         = client.get_cluster_nodes()
@@ -176,7 +176,7 @@ with HeliusClient(api_key="YOUR_HELIUS_API_KEY") as client:
     tx            = client.get_transaction("5j7s...signature...")
 ```
 
-`HeliusClient` implements the context-manager protocol via `__enter__` /
+`SolanaRpcClient` implements the context-manager protocol via `__enter__` /
 `__exit__`, so the underlying `httpx.Client` is closed cleanly when the
 `with` block exits.
 
@@ -186,9 +186,9 @@ If a `with` block doesn't fit your code structure (e.g. the client lives
 on a long-lived object), call `close()` yourself when you're done:
 
 ```python
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
-client = HeliusClient(api_key="YOUR_HELIUS_API_KEY")
+client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 try:
     _ctx, balance = client.get_balance("So11111111111111111111111111111111111111112")
     _ctx, supply  = client.get_supply()

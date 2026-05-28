@@ -25,7 +25,7 @@ import argparse
 import statistics
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 
 def percentile(sorted_values: list[int], pct: float) -> int:
@@ -46,7 +46,7 @@ def main() -> int:
     args = parser.parse_args()
     accounts = args.account or None
 
-    with HeliusClient() as helius:
+    with SolanaRpcClient() as helius:
         samples = helius.get_recent_prioritization_fees(
             locked_writable_accounts=accounts
         )

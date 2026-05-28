@@ -18,11 +18,11 @@ from __future__ import annotations
 
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 
 def main() -> int:
-    with HeliusClient() as helius:
+    with SolanaRpcClient() as helius:
         healthy = helius.get_health()
         solana_core, feature_set = helius.get_version()
         identity = helius.get_identity()

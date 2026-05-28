@@ -1,4 +1,4 @@
-When implementing a function for a RPC method in the HeliusClient class, read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
+When implementing a function for a RPC method in the SolanaRpcClient class, read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
 
 # API Reference
 
@@ -6,7 +6,7 @@ The API reference is generated from **Google-style docstrings** on every public 
 
 ## Where docstrings live
 
-- **Client methods** (`HeliusClient.get_*`, `is_*`, `request_*`, etc.) — every public method gets a docstring. Private methods (`_send`, dunders) do not need one.
+- **Client methods** (`SolanaRpcClient.get_*`, `is_*`, `request_*`, etc.) — every public method gets a docstring. Private methods (`_send`, dunders) do not need one.
 - **Models** (`src/helius/models.py`) — every public model class gets a docstring describing what it represents. Individual fields don't need per-field docstrings if their names and types are self-explanatory; only document fields where the meaning, units, or nullability isn't obvious from the type alone.
 - **Builders / helpers** (`RpcRequest`) — class docstring describing purpose, plus one-line docstrings on each public method.
 
@@ -154,7 +154,7 @@ One fixture per model is enough. The goal is to catch schema mismatches (missing
 
 ### 3. Client methods — `respx`-mocked tests
 
-For each method on `HeliusClient`, write at least one test that asserts **both** sides of the wire:
+For each method on `SolanaRpcClient`, write at least one test that asserts **both** sides of the wire:
 
 - **Outgoing request:** the JSON body sent to Helius matches the JSON-RPC payload you expect — correct `method`, correct positional `params`, correct config object with snake → camel mapping, and optional arguments omitted when `None`.
 - **Return value:** the method correctly parses a canned response into the documented return shape (model, tuple, primitive, etc.).
@@ -169,7 +169,7 @@ Skeleton:
 import json
 import httpx
 import respx
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 @respx.mock
 def test_get_balance():
@@ -183,7 +183,7 @@ def test_get_balance():
             },
         )
     )
-    with HeliusClient(api_key="test") as c:
+    with SolanaRpcClient(api_key="test") as c:
         assert c.get_balance("So11...112", commitment="finalized") == 42
 
     sent = route.calls.last.request
@@ -197,8 +197,8 @@ For methods with branching logic (e.g. `get_block_production`, `get_token_accoun
 
 ## Conventions
 
-- Construct `HeliusClient` in tests with an explicit `api_key="test"` (or similar). Never rely on a real `.env` file.
-- Use the context-manager form (`with HeliusClient(...) as c:`) in tests so the `httpx.Client` is closed cleanly.
+- Construct `SolanaRpcClient` in tests with an explicit `api_key="test"` (or similar). Never rely on a real `.env` file.
+- Use the context-manager form (`with SolanaRpcClient(...) as c:`) in tests so the `httpx.Client` is closed cleanly.
 - Group tests in `tests/unit/test_client.py` by method, but a single file is fine until it grows unwieldy.
 - Test names should describe the behavior, not the implementation: `test_get_balance_includes_commitment_in_config`, not `test_get_balance_calls_set`.
 - When adding a new client method, the PR must include: (a) a `respx` test asserting the request payload, and (b) a fixture-based model test if the method introduces or uses a model. This is enforced in `CONTRIBUTING.md`.

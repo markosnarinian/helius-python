@@ -21,7 +21,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -36,9 +36,11 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    with HeliusClient() as helius:
-        slot = args.slot if args.slot is not None else helius.get_slot(
-            commitment="finalized"
+    with SolanaRpcClient() as helius:
+        slot = (
+            args.slot
+            if args.slot is not None
+            else helius.get_slot(commitment="finalized")
         )
         block = helius.get_block(
             slot,
@@ -70,8 +72,9 @@ def main() -> int:
     print(f"\nTransactions     : {total:,} total")
     print(f"  succeeded      : {succeeded:,}")
     print(f"  failed         : {failed:,}")
-    print(f"Total fees       : {fees / LAMPORTS_PER_SOL:.9f} SOL "
-          f"({fees:,} lamports)")
+    print(
+        f"Total fees       : {fees / LAMPORTS_PER_SOL:.9f} SOL " f"({fees:,} lamports)"
+    )
 
     if block.rewards:
         print(f"\nRewards ({len(block.rewards)}):")

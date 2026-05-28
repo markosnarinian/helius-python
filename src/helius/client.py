@@ -28,7 +28,7 @@ from helius.models import (
 )
 
 
-class HeliusClient:
+class SolanaRpcClient:
     def __init__(
         self,
         *,

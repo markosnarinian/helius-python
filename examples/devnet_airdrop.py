@@ -24,7 +24,7 @@ import argparse
 import sys
 import time
 
-from helius.client import HeliusClient
+from helius.client import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 DEVNET_URL = "https://devnet.helius-rpc.com"
@@ -48,7 +48,7 @@ def main() -> int:
     args = parser.parse_args()
     lamports = int(args.sol * LAMPORTS_PER_SOL)
 
-    client = HeliusClient(base_url=DEVNET_URL)
+    client = SolanaRpcClient(base_url=DEVNET_URL)
     try:
         print(f"Requesting {args.sol} SOL airdrop to {args.address} on devnet...")
         signature = client.request_airdrop(args.address, lamports)
