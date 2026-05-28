@@ -92,7 +92,7 @@
     <a href="https://pypi.org/project/helius-python/"><img src="https://img.shields.io/pypi/v/helius-python.svg" alt="PyPI version"></a>
     <a href="https://pypi.org/project/helius-python/"><img src="https://img.shields.io/pypi/pyversions/helius-python.svg" alt="Python versions"></a>
     <a href="https://github.com/markosnarinian/helius-python/blob/main/LICENSE"><img src="https://img.shields.io/github/license/markosnarinian/helius-python.svg" alt="License"></a>
-    <a href="https://github.com/markosnarinian/helius-python/actions/workflows/ci.yml"><img src="https://github.com/markosnarinian/helius-python/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+    <a href="https://github.com/markosnarinian/helius-python/actions/workflows/python-package.yml"><img src="https://github.com/markosnarinian/helius-python/actions/workflows/python-package.yml/badge.svg" alt="CI"></a>
     <a href="https://pypistats.org/packages/helius-python"><img src="https://img.shields.io/pypi/dm/helius-python.svg" alt="Downloads"></a>
     <a href="https://github.com/markosnarinian/helius-python/commits/main"><img src="https://img.shields.io/github/last-commit/markosnarinian/helius-python.svg" alt="Last commit"></a>
     <a href="https://github.com/markosnarinian/helius-python/stargazers"><img src="https://img.shields.io/github/stars/markosnarinian/helius-python.svg" alt="Stars"></a>
