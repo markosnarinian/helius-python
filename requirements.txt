@@ -1,3 +1,5 @@
 httpx
 pydantic
 python-dotenv
+respx
+pytest
