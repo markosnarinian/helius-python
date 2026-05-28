@@ -43,6 +43,7 @@ easiest to most involved:
   fleshed out.
 - **Improve docs and examples.** Clearer docstrings, better README snippets,
   more realistic examples.
+- **Create an example or refine an existing one.** Examples make it easier for developers to get started.
 
 If you're not sure where to start, browse the
 [open issues](https://github.com/markosnarinian/helius-python/issues).
