@@ -96,6 +96,16 @@ class InflationRate(BaseModel):
     epoch: int
 
 
+class InflationReward(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    epoch: int
+    effective_slot: int
+    amount: int
+    post_balance: int
+    commission: int | None
+
+
 class PerformanceSample(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 

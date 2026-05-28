@@ -7,6 +7,7 @@ from helius.models import (
     EpochSchedule,
     InflationGovernor,
     InflationRate,
+    InflationReward,
     LamportAccount,
     PerformanceSample,
     Rewards,
@@ -154,6 +155,22 @@ def test_inflation_rate_validates_fixture():
     )
 
     assert rate.foundation == 0.001
+
+
+def test_inflation_reward_validates_aliases():
+    reward = InflationReward.model_validate(
+        {
+            "epoch": 2,
+            "effectiveSlot": 224,
+            "amount": 2500,
+            "postBalance": 499999442500,
+            "commission": 5,
+        }
+    )
+
+    assert reward.effective_slot == 224
+    assert reward.post_balance == 499999442500
+    assert reward.commission == 5
 
 
 def test_performance_sample_validates_aliases():

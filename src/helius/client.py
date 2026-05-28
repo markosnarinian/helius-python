@@ -14,6 +14,7 @@ from helius.models import (
     EpochSchedule,
     InflationGovernor,
     InflationRate,
+    InflationReward,
     LamportAccount,
     PerformanceSample,
     SignatureStatus,
@@ -67,7 +68,8 @@ class HeliusClient:
         return response.json()
 
     def get_account_info(
-        self, *,
+        self,
+        *,
         public_key: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         encoding: (
@@ -104,7 +106,8 @@ class HeliusClient:
         return context, account_info
 
     def get_balance(
-        self, *,
+        self,
+        *,
         public_key: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
@@ -122,7 +125,8 @@ class HeliusClient:
         return context, value
 
     def get_block(
-        self, *,
+        self,
+        *,
         slot: int,
         commitment: Literal["finalized", "confirmed"] | None = None,
         encoding: Literal["jsonParsed", "base58", "base64", "base64+std"] | None = None,
@@ -147,7 +151,8 @@ class HeliusClient:
         return block
 
     def get_block_commitment(
-        self, *,
+        self,
+        *,
         slot: int,
     ) -> BlockCommitment:
         request = RpcRequest(method="getBlockCommitment").add(slot).build()
@@ -156,7 +161,8 @@ class HeliusClient:
         return block_commitment
 
     def get_block_height(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> int:
@@ -170,7 +176,8 @@ class HeliusClient:
         return response["result"]
 
     def get_block_production(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         first_slot: int | None = None,
         last_slot: int | None = None,
@@ -205,7 +212,8 @@ class HeliusClient:
         return context, value
 
     def get_blocks(
-        self, *,
+        self,
+        *,
         start_slot: int,
         end_slot: int | None,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
@@ -225,7 +233,8 @@ class HeliusClient:
         return response["result"]
 
     def get_blocks_with_limit(
-        self, *,
+        self,
+        *,
         start_slot: int,
         limit: int,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
@@ -253,7 +262,8 @@ class HeliusClient:
         return cluster_nodes
 
     def get_epoch_info(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> EpochInfo:
@@ -274,7 +284,8 @@ class HeliusClient:
         return epoch_schedule
 
     def get_fee_for_message(
-        self, *,
+        self,
+        *,
         message: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
@@ -321,7 +332,8 @@ class HeliusClient:
         return identity
 
     def get_inflation_governor(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> InflationGovernor:
         request = (
@@ -339,10 +351,29 @@ class HeliusClient:
         inflation_rate = InflationRate.model_validate(response["result"])
         return inflation_rate
 
-    # TODO: getInflationReward
+    def get_inflation_reward(
+        self, *,
+        addresses: list[str],
+        commitment: Literal["finalized", "confirmed"] | None = None,
+        epoch: int | None = None,
+        min_context_slot: int | None = None,
+    ) -> list[InflationReward | None]:
+        request = (
+            RpcRequest(method="getInflationReward")
+            .add(addresses)
+            .set("commitment", commitment)
+            .set("epoch", epoch)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        ta = TypeAdapter(list[InflationReward | None])
+        return ta.validate_python(result)
 
     def get_largest_accounts(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         filter: Literal["circulating", "nonCirculating"] | None = None,
     ) -> tuple[dict, list[LamportAccount]]:
@@ -360,7 +391,8 @@ class HeliusClient:
         return context, largest_accounts
 
     def get_latest_blockhash(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> tuple[dict, str, int]:
@@ -378,7 +410,8 @@ class HeliusClient:
         return context, blockhash, last_valid_block_height
 
     def get_leader_schedule(
-        self, *,
+        self,
+        *,
         slot: int | None = None,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         identity: str | None = None,
@@ -407,7 +440,8 @@ class HeliusClient:
         return result
 
     def get_minimum_balance_for_rent_exemption(
-        self, *,
+        self,
+        *,
         data_length: int,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> int:
@@ -422,7 +456,8 @@ class HeliusClient:
         return result
 
     def get_multiple_accounts(
-        self, *,
+        self,
+        *,
         pubkeys: list[str],
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         encoding: (
@@ -466,7 +501,8 @@ class HeliusClient:
 
     @validate_call
     def get_program_accounts(
-        self, *,
+        self,
+        *,
         program_id: str,
         commitment: Literal["confirmed", "finalized", "processed"] | None = None,
         min_context_slot: int | None = None,
@@ -507,7 +543,8 @@ class HeliusClient:
         return [(i["pubkey"], Account.model_validate(i["account"])) for i in result]
 
     def get_recent_performance_samples(
-        self, *,
+        self,
+        *,
         limit: int | None = None,
     ) -> list[PerformanceSample]:
         request = RpcRequest(method="getRecentPerformanceSamples").add(limit).build()
@@ -516,7 +553,8 @@ class HeliusClient:
         return ta.validate_python(response["result"])
 
     def get_recent_prioritization_fees(
-        self, *,
+        self,
+        *,
         locked_writable_accounts: list[str] | None = None,
     ) -> list[tuple[int, int]]:
         request = (
@@ -529,7 +567,8 @@ class HeliusClient:
 
     @validate_call
     def get_signatures_for_address(
-        self, *,
+        self,
+        *,
         address: str,
         limit: Annotated[int, Field(ge=1, le=1000)] = 1000,
         before: str | None = None,
@@ -553,7 +592,8 @@ class HeliusClient:
         return transaction_signatures
 
     def get_signature_statuses(
-        self, *,
+        self,
+        *,
         signatures: list[str],
         search_transaction_history: bool | None = None,
     ) -> tuple[dict, list[SignatureStatus | None]]:
@@ -572,7 +612,8 @@ class HeliusClient:
         return context, signature_statuses
 
     def get_slot(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> int:
@@ -586,7 +627,8 @@ class HeliusClient:
         return response["result"]
 
     def get_slot_leader(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> str:
@@ -601,7 +643,8 @@ class HeliusClient:
 
     @validate_call
     def get_slot_leaders(
-        self, *,
+        self,
+        *,
         start_slot: int,
         limit: Annotated[int, Field(ge=1, le=5000)],
     ) -> list[str]:
@@ -610,7 +653,8 @@ class HeliusClient:
         return response["result"]
 
     def get_stake_minimum_delegation(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, int]:
         request = (
@@ -624,7 +668,8 @@ class HeliusClient:
         return context, value
 
     def get_supply(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         exclude_non_circulating_accounts_list: bool | None = None,
     ) -> tuple[dict, Supply]:
@@ -645,7 +690,8 @@ class HeliusClient:
     # TODO: use getProgramAccountsV2 which supports pagination
 
     def get_token_account_balance(
-        self, *,
+        self,
+        *,
         token_account: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, TokenAccountBalance]:
@@ -661,7 +707,8 @@ class HeliusClient:
         return context, balance
 
     def get_token_accounts_by_delegate(
-        self, *,
+        self,
+        *,
         delegate_pub_key: str,
         mint: str | None = None,
         program_id: str | None = None,
@@ -710,7 +757,8 @@ class HeliusClient:
         return context, token_accounts
 
     def get_token_accounts_by_owner(
-        self, *,
+        self,
+        *,
         owner_pub_key: str,
         mint: str | None = None,
         program_id: str | None = None,
@@ -761,7 +809,8 @@ class HeliusClient:
     # TODO: use getTokenAccountsByOwnerV2 and do pagination
 
     def get_token_largest_accounts(
-        self, *,
+        self,
+        *,
         mint: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, list[TokenAccount]]:
@@ -778,7 +827,8 @@ class HeliusClient:
         return context, largest_accounts
 
     def get_token_supply(
-        self, *,
+        self,
+        *,
         mint_address: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, TokenSupply]:
@@ -794,7 +844,8 @@ class HeliusClient:
         return context, token_supply
 
     def get_transaction(
-        self, *,
+        self,
+        *,
         transaction_signature: str,
         commitment: Literal["finalized", "confirmed"] | None = None,
         encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
@@ -813,7 +864,8 @@ class HeliusClient:
         return transaction
 
     def get_transaction_count(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
     ) -> int:
@@ -833,7 +885,8 @@ class HeliusClient:
         return result["solana-core"], result["feature-set"]
 
     def get_vote_accounts(
-        self, *,
+        self,
+        *,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         vote_pubkey: str | None = None,
         keep_unstaked_delinquents: bool | None = None,
@@ -854,7 +907,8 @@ class HeliusClient:
         return current, delinquent
 
     def is_blockhash_valid(
-        self, *,
+        self,
+        *,
         blockhash: str,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
         min_context_slot: int | None = None,
@@ -872,7 +926,8 @@ class HeliusClient:
         return context, value
 
     def request_airdrop(
-        self, *,
+        self,
+        *,
         public_key: str,
         lamports: int,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,

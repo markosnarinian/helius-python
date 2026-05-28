@@ -565,6 +565,62 @@ def test_get_inflation_rate():
 
 
 # ---------------------------------------------------------------------------
+# get_inflation_reward
+# ---------------------------------------------------------------------------
+
+
+@respx.mock
+def test_get_inflation_reward():
+    route = mock_rpc(
+        [
+            {
+                "epoch": 2,
+                "effectiveSlot": 224,
+                "amount": 2500,
+                "postBalance": 499999442500,
+                "commission": 5,
+            },
+            None,
+        ]
+    )
+    with HeliusClient(api_key="test") as client:
+        result = client.get_inflation_reward(
+            addresses=[
+                "6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu",
+                "BGsqMegLpV6n6Ve146sSX2dTjUMj3M92HnU8BbNRMhF2",
+            ],
+            commitment="confirmed",
+            epoch=2,
+            min_context_slot=1000,
+        )
+    assert len(result) == 2
+    assert result[0].epoch == 2
+    assert result[0].effective_slot == 224
+    assert result[0].post_balance == 499999442500
+    assert result[0].commission == 5
+    assert result[1] is None
+    assert body(route)["method"] == "getInflationReward"
+    assert body(route)["params"] == [
+        [
+            "6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu",
+            "BGsqMegLpV6n6Ve146sSX2dTjUMj3M92HnU8BbNRMhF2",
+        ],
+        {"commitment": "confirmed", "epoch": 2, "minContextSlot": 1000},
+    ]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_inflation_reward_omits_config_when_not_set():
+    route = mock_rpc([None])
+    with HeliusClient(api_key="test") as client:
+        result = client.get_inflation_reward(addresses=["6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu"])
+    assert result == [None]
+    assert body(route)["params"] == [["6dmNQ5jwLeLk5REvio1JcMshcbvkYMwy26sJ8pbkvStu"]]
+    assert_api_key(route)
+
+
+# ---------------------------------------------------------------------------
 # get_largest_accounts
 # ---------------------------------------------------------------------------
 
