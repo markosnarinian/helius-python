@@ -16,7 +16,7 @@ authors = [
 ]
 description = "Typed Python client for the Helius API"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
   "httpx",
   "pydantic",
