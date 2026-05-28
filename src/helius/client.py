@@ -28,10 +28,8 @@ from helius.models import (
 
 
 class HeliusClient:
-    # BUG: check which endpoints return meaningful data in context
-    # BUG: handle helius errors that do not show by HTTP response code
+    # TODO: handle helius errors that do not show by HTTP response code
     # TODO: check all http methods and all guides and implement pagination and other non-implemented features
-    # TODO: consider refactoring | None = None to Optional[] = None
     def __init__(
         self,
         *,
