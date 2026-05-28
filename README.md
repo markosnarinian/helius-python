@@ -98,55 +98,6 @@
   </p>
   
 **A complete, typed Python client for [Helius](https://helius.dev) — the Solana developer platform.**
-<br />
-
-## TL;DR
-
-```bash
-pip install helius-python
-```
-
-```python
-# export HELIUS_API_KEY=your_key   (or put it in .env)
-
-from helius.client import HeliusClient
-
-with HeliusClient() as helius:
-    _ctx, lamports = helius.get_balance("7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU")
-    print(f"{lamports / 1_000_000_000:.4f} SOL")
-
-    for sig in helius.get_signatures_for_address(
-        "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU", limit=5
-    ):
-        print(sig.slot, "ERR" if sig.err else "OK ", sig.signature)
-```
-
-`HELIUS_API_KEY` is read from the environment (or `.env`), the
-client is a context manager, and every return value is fully typed.
-
-## Why this over `solana-py` / `solders`?
-
-`solders` is for building and signing transactions. `solana-py` is a generic Solana RPC client. Use them for that.
-
-This library is for talking to **Helius** specifically — typed `pydantic` responses, snake_case, and (eventually) the Helius-only endpoints (DAS, Enhanced Transactions, Webhooks, priority fees) the others don't cover. Plays nicely alongside `solders`: sign with `solders`, read with `helius-python`.
-
-## Example: wallet tracker
-
-See [`examples/wallet_tracker.py`](examples/wallet_tracker.py) for a
-runnable script that takes a wallet address and prints:
-
-- SOL balance
-- All non-empty SPL token accounts (mint, balance, account)
-- The last N transactions (timestamp, slot, success/error, signature)
-
-```bash
-export HELIUS_API_KEY=your_helius_api_key
-python examples/wallet_tracker.py 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU --limit 20
-```
-
-It uses `get_balance`, `get_token_accounts_by_owner` (with
-`encoding="jsonParsed"`), and `get_signatures_for_address` — pure
-stdlib plus this library, no `solana-py` or `solders` needed.
 
 ## Coverage
 
