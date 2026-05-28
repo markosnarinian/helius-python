@@ -1361,3 +1361,48 @@ def test_minimum_ledger_slot():
     assert body(route)["method"] == "minimumLedgerSlot"
     assert body(route).get("params") is None
     assert_api_key(route)
+
+
+# ---------------------------------------------------------------------------
+# send_transaction
+# ---------------------------------------------------------------------------
+
+
+@respx.mock
+def test_send_transaction_minimal():
+    sig = "2id3YC2jK9G5Wo2phDx4gJVAew8DcY5NAojnVuao8rkxwPYPe8cSwE5GzhEgJA2y8fVjDEo6iR6ykBvDxrTQrtpb"
+    route = mock_rpc(sig)
+    with HeliusClient(api_key="test") as client:
+        result = client.send_transaction(transaction="4hXTCkRzt9WyecNzV1XPgCDfGAZzQKNxLXgynz5Q")
+    assert result == sig
+    assert body(route)["method"] == "sendTransaction"
+    assert body(route)["params"] == ["4hXTCkRzt9WyecNzV1XPgCDfGAZzQKNxLXgynz5Q"]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_send_transaction_with_config():
+    sig = "2id3YC2jK9G5Wo2phDx4gJVAew8DcY5NAojnVuao8rkxwPYPe8cSwE5GzhEgJA2y8fVjDEo6iR6ykBvDxrTQrtpb"
+    route = mock_rpc(sig)
+    with HeliusClient(api_key="test") as client:
+        result = client.send_transaction(
+            transaction="BASE64TXN==",
+            encoding="base64",
+            skip_preflight=True,
+            preflight_commitment="confirmed",
+            max_retries=5,
+            min_context_slot=1000,
+        )
+    assert result == sig
+    assert body(route)["method"] == "sendTransaction"
+    assert body(route)["params"] == [
+        "BASE64TXN==",
+        {
+            "encoding": "base64",
+            "skipPreflight": True,
+            "preflightCommitment": "confirmed",
+            "maxRetries": 5,
+            "minContextSlot": 1000,
+        },
+    ]
+    assert_api_key(route)

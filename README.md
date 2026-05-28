@@ -339,6 +339,7 @@ continuously.
 | `isBlockhashValid`                  | `is_blockhash_valid(...)`                     | [guide](https://www.helius.dev/docs/rpc/guides/isblockhashvalid), [reference](https://www.helius.dev/docs/api-reference/rpc/http/isblockhashvalid)                                   |
 | `minimumLedgerSlot`                 | `minimum_ledger_slot()`                       | [guide](https://www.helius.dev/docs/rpc/guides/minimumledgerslot), [reference](https://www.helius.dev/docs/api-reference/rpc/http/minimumledgerslot)                                 |
 | `requestAirdrop`                    | `request_airdrop(...)`                        | [guide](https://www.helius.dev/docs/rpc/guides/requestairdrop), [reference](https://www.helius.dev/docs/api-reference/rpc/http/requestairdrop)                                       |
+| `sendTransaction`                   | `send_transaction(...)`                       | [guide](https://www.helius.dev/docs/rpc/guides/sendtransaction), [reference](https://www.helius.dev/docs/api-reference/rpc/http/sendtransaction)                                     |
 
 ## License
 

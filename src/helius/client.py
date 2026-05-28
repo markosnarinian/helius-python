@@ -949,6 +949,31 @@ class HeliusClient:
         response = self._send(request)
         return response["result"]
 
+    def send_transaction(
+        self,
+        *,
+        transaction: str,
+        encoding: Literal["base58", "base64"] | None = None,
+        skip_preflight: bool | None = None,
+        preflight_commitment: (
+            Literal["finalized", "confirmed", "processed"] | None
+        ) = None,
+        max_retries: int | None = None,
+        min_context_slot: int | None = None,
+    ) -> str:
+        request = (
+            RpcRequest(method="sendTransaction")
+            .add(transaction)
+            .set("encoding", encoding)
+            .set("skipPreflight", skip_preflight)
+            .set("preflightCommitment", preflight_commitment)
+            .set("maxRetries", max_retries)
+            .set("minContextSlot", min_context_slot)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
 
 class RpcRequest:
     class Request(BaseModel):
