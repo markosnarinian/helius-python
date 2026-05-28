@@ -352,7 +352,8 @@ class HeliusClient:
         return inflation_rate
 
     def get_inflation_reward(
-        self, *,
+        self,
+        *,
         addresses: list[str],
         commitment: Literal["finalized", "confirmed"] | None = None,
         epoch: int | None = None,
