@@ -17,11 +17,10 @@
 
 ## Checklist for adding a new client method
 
-1. Read the docs for the specific RPC method. For example, for the get_supply function (getSupply RPC method) you should read https://www.helius.dev/docs/rpc/guides/getsupply and https://www.helius.dev/docs/api-reference/rpc/http/getsupply.
+1. Read the docs. The user should provide the relevant URLs. If they don't, ask them to do so.
 2. Implement the method, following the **Implementation conventions** above — in particular, return `(context, value)` if the upstream response is wrapped.
-3. Add a docstring with `Args`, `Returns`, `Raises` (if any), `Note` (if any), and `See Also` with both Helius URLs.
-4. Add the method to the "Supported methods" table in `README.md`.
-5. Add tests per the Testing section.
+3. Add the method to the "Supported methods" table in `README.md`.
+4. Add tests per the Testing section.
 
 # Testing
 
