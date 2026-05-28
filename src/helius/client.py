@@ -924,6 +924,11 @@ class HeliusClient:
         value = response["result"]["value"]
         return context, value
 
+    def minimum_ledger_slot(self) -> int:
+        request = RpcRequest(method="minimumLedgerSlot").build()
+        response = self._send(request)
+        return response["result"]
+
     def request_airdrop(
         self,
         *,
@@ -941,11 +946,6 @@ class HeliusClient:
             .set("commitment", commitment)
             .build()
         )
-        response = self._send(request)
-        return response["result"]
-
-    def minimum_ledger_slot(self) -> int:
-        request = RpcRequest(method="minimumLedgerSlot").build()
         response = self._send(request)
         return response["result"]
 
