@@ -1,4 +1,4 @@
-import os
+from os import environ
 from typing import Annotated, Any, Literal
 
 import httpx
@@ -38,7 +38,7 @@ class SolanaRpcClient:
         base_url = base_url
         api_key = (
             api_key
-            or os.environ.get("HELIUS_API_KEY")
+            or environ.get("HELIUS_API_KEY")
             or dotenv_values().get("HELIUS_API_KEY")
             or None
         )
