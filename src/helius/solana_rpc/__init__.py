@@ -1,4 +1,4 @@
-from helius.solana_rpc import RpcRequest
+from helius.solana_rpc.rpc_request import RpcRequest
 from helius.solana_rpc.client import SolanaRpcClient
 from helius.solana_rpc.models import (
     Account,
