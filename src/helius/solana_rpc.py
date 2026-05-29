@@ -35,17 +35,18 @@ class SolanaRpcClient:
         base_url: str = "https://mainnet.helius-rpc.com",
         api_key: str | None = None,
     ) -> None:
-        self.base_url = base_url
-        self.api_key = (
+        base_url = base_url
+        api_key = (
             api_key
             or os.environ.get("HELIUS_API_KEY")
             or dotenv_values().get("HELIUS_API_KEY")
+            or None
         )
-        if not self.api_key:
+        if not api_key:
             raise ValueError("No API key provided.")
         self._client = httpx.Client(
-            base_url=self.base_url,
-            params={"api-key": self.api_key},
+            base_url=base_url,
+            params={"api-key": api_key},
         )
 
     def __enter__(self):
