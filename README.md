@@ -132,6 +132,11 @@ wraps it.
 4. **Zero magic** — thin, predictable wrappers that map directly to the
    documented Helius API.
 
+## Installation via PyPI
+```bash
+pip install helius-python
+```
+
 ## Authentication
 
 Pass your Helius API key explicitly:
