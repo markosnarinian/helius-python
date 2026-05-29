@@ -21,6 +21,7 @@ dependencies = [
   "httpx",
   "pydantic",
   "python-dotenv",
+  "websockets",
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -41,3 +42,6 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/helius"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
