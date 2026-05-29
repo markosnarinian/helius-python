@@ -4,8 +4,8 @@ import httpx
 import pytest
 import respx
 
-from helius.models import Account
 from helius.solana_rpc import SolanaRpcClient
+from helius.solana_rpc.models import Account
 
 ACCOUNT_VALUE = {
     "lamports": 5_000_000_000,

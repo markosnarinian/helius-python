@@ -1,4 +1,4 @@
-from helius.models import (
+from helius.solana_rpc.models import (
     Account,
     Block,
     BlockCommitment,
@@ -75,6 +75,7 @@ def test_block_validates_nested_rewards_and_aliases():
     )
 
     assert block.previous_blockhash == "prev"
+    assert block.rewards is not None
     assert block.rewards[0].post_balance == 2
 
 
@@ -196,7 +197,12 @@ def test_lamport_account_validates_fixture():
 
 def test_signature_status_validates_aliases():
     status = SignatureStatus.model_validate(
-        {"slot": 1, "confirmations": None, "err": None, "confirmationStatus": "finalized"}
+        {
+            "slot": 1,
+            "confirmations": None,
+            "err": None,
+            "confirmationStatus": "finalized",
+        }
     )
 
     assert status.confirmation_status == "finalized"
@@ -322,4 +328,5 @@ def test_transaction_validates_nested_metadata_and_aliases():
     )
 
     assert transaction.block_time == 123
+    assert transaction.meta is not None
     assert transaction.meta.fee == 5000
