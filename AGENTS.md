@@ -1,14 +1,3 @@
-
-## Conventions
-
-- Use **double-quoted triple strings** (`"""..."""`).
-- Wrap docstring lines at 88 columns.
-- Refer to parameters in backticks: `` `commitment` ``, `` `min_context_slot` ``.
-- Refer to other client methods with their snake_case name in backticks: `` `get_balance` ``.
-- Do NOT include the upstream JSON-RPC method name in the summary — that's already in the See Also URLs.
-- Do NOT copy-paste large chunks from the Helius docs. Summarize and link.
-- Examples (`Example:` section) are encouraged for methods with non-trivial argument combinations (e.g. `get_block_production`, `get_token_accounts_by_owner`), optional for everything else.
-
 ## Implementation conventions
 
 - **If the RPC returns an `RpcResponse` wrapper (`{context, value}`), the Python method MUST return `(context, value)`** — never silently drop `context`. For methods whose `value` is itself a small composite, flatten the tuple (e.g. `get_latest_blockhash` returns `tuple[dict, str, int]`, not `tuple[dict, tuple[str, int]]`). Check the upstream Helius API reference page to see whether the response is wrapped.
