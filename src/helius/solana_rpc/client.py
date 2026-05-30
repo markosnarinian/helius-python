@@ -18,6 +18,7 @@ from helius.solana_rpc.models import (
     InflationReward,
     LamportAccount,
     PerformanceSample,
+    ProgramAccount,
     SignatureStatus,
     Supply,
     TokenAccount,
@@ -517,7 +518,7 @@ class SolanaRpcClient:
         data_slice_length: int | None = None,
         changed_since_slot: int | None = None,
         filters: list[dict] | None = None,
-    ) -> list[tuple[str, Account]]:
+    ) -> list[ProgramAccount]:
         if (data_slice_offset is None) != (data_slice_length is None):
             raise ValueError(
                 "Set both data_slice_length and data_slice_offset or neither."
@@ -542,8 +543,9 @@ class SolanaRpcClient:
             .build()
         )
         response = self._send(request)
-        result = response["result"]
-        return [(i["pubkey"], Account.model_validate(i["account"])) for i in result]
+        ta = TypeAdapter(list[ProgramAccount])
+        program_accounts = ta.validate_python(response["result"])
+        return program_accounts
 
     def get_recent_performance_samples(
         self,

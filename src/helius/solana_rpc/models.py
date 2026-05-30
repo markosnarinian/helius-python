@@ -15,6 +15,13 @@ class Account(BaseModel):
     space: int | None = None
 
 
+class ProgramAccount(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    pubkey: str
+    account: Account
+
+
 class Rewards(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
