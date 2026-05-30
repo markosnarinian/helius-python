@@ -83,6 +83,15 @@ class WebSocketClient:
         response = self._websocket.recv()
         return json.loads(response)
 
+    def _unsubscribe(self, subscription, subscription_type) -> bool:
+        request = (
+            JsonRpcRequest(method=f"{subscription_type}Unsubscribe")
+            .add(subscription)
+            .build()
+        )
+        response = self._send(request)
+        return response["result"]
+
     def logs_subscribe(
         self,
         *,
@@ -149,15 +158,6 @@ class WebSocketClient:
         response = self._send(request)
         subscription = response["result"]
         return subscription
-
-    def _unsubscribe(self, subscription, subscription_type) -> bool:
-        request = (
-            JsonRpcRequest(method=f"{subscription_type}Unsubscribe")
-            .add(subscription)
-            .build()
-        )
-        response = self._send(request)
-        return response["result"]
 
     def logs_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("logs", subscription)
