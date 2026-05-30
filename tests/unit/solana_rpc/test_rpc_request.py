@@ -1,18 +1,20 @@
-from helius.solana_rpc import JsonRpcRequest
+from helius.rpc import JsonRpcRequest
 
 
 def test_add_skips_none_unless_allowed():
     assert JsonRpcRequest(method="test").add(None).add("x").build()["params"] == ["x"]
-    assert JsonRpcRequest(method="test").add(None, can_be_none=True).build()["params"] == [
-        None
-    ]
+    assert JsonRpcRequest(method="test").add(None, can_be_none=True).build()[
+        "params"
+    ] == [None]
 
 
 def test_set_skips_none_unless_allowed():
-    assert JsonRpcRequest(method="test").set("commitment", None).build()["params"] is None
-    assert JsonRpcRequest(method="test").set("commitment", None, can_be_none=True).build()[
-        "params"
-    ] == [{"commitment": None}]
+    assert (
+        JsonRpcRequest(method="test").set("commitment", None).build()["params"] is None
+    )
+    assert JsonRpcRequest(method="test").set(
+        "commitment", None, can_be_none=True
+    ).build()["params"] == [{"commitment": None}]
 
 
 def test_positional_params_precede_config_dict():
