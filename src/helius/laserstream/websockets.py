@@ -14,10 +14,10 @@ class Notification(BaseModel):
     pass
 
 
-class LogsNotification(Notification):
+class TransactionNotification(Notification):
+    transaction: dict
     signature: str
-    err: dict | str
-    logs: list[str]
+    slot: int
 
 
 class AccountNotification(Notification):
@@ -35,24 +35,15 @@ class BlockNotification(Notification):
     block: dict | None
 
 
+class LogsNotification(Notification):
+    signature: str
+    err: dict | str
+    logs: list[str]
+
+
 class ProgramNotification(Notification):
     pubkey: str
     account: AccountNotification
-
-
-class TransactionNotification(Notification):
-    transaction: dict
-    signature: str
-    slot: int
-
-
-class SignatureNotification(Notification):
-    value: dict[str, None | str]
-
-    @model_validator(mode="before")
-    @classmethod
-    def wrap_value(cls, data):
-        return {"value": data}
 
 
 class RootNotification(Notification):
@@ -64,6 +55,15 @@ class RootNotification(Notification):
         if not isinstance(data, dict):
             return {"root": data}
         return data
+
+
+class SignatureNotification(Notification):
+    value: dict[str, None | str]
+
+    @model_validator(mode="before")
+    @classmethod
+    def wrap_value(cls, data):
+        return {"value": data}
 
 
 class SlotNotification(Notification):
