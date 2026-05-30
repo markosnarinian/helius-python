@@ -53,7 +53,7 @@ class RootNotification(Notification):
     @classmethod
     def wrap_scalar(cls, data):
         if not isinstance(data, dict):
-            return {"a": data}
+            return {"root": data}
         return data
 
 
@@ -76,6 +76,7 @@ class WebSocketClient:
         "blockNotification": BlockNotification,
         "logsNotification": LogsNotification,
         "programNotification": ProgramNotification,
+        "rootNotification": RootNotification,
         "transactionNotification": TransactionNotification,
     }
 
@@ -209,6 +210,12 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def root_subscribe(self) -> int:
+        request = JsonRpcRequest(method="rootSubscribe").build()
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def transaction_subscribe(
         self,
         *,
@@ -270,6 +277,9 @@ class WebSocketClient:
 
     def program_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("program", subscription)
+
+    def root_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("root", subscription)
 
     def transaction_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("transaction", subscription)
