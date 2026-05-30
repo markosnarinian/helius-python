@@ -26,7 +26,8 @@ class TransactionNotification(Notification):
     signature: str
     slot: int
 
-class RootNotification(Notification)
+
+class RootNotification(Notification):
     root: int
 
     @model_validator(mode="before")
