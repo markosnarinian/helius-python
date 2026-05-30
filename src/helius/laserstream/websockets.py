@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, Generator, Literal, TypedDict
 
 import httpx
 from dotenv import dotenv_values
@@ -271,10 +271,10 @@ class WebSocketClient:
     def program_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("program", subscription)
 
-    def transaction_unsubscribe(self, subscription):
+    def transaction_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("transaction", subscription)
 
-    def receive(self):
+    def receive(self) -> tuple[dict | None, Notification, int]:
         response = json.loads(self._websocket.recv())
         model = self.MODELS[response["method"]]
         result = response["result"]
@@ -287,7 +287,7 @@ class WebSocketClient:
             notification = model.model_validate(result)
         return context, notification, subscription
 
-    def listen(self):
+    def listen(self) -> Generator[tuple[dict | None, Notification, int]]:
         while True:
-            notification = self.receive()
-            yield notification
+            context, notification, subscription = self.receive()
+            yield context, notification, subscription
