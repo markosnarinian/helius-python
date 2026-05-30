@@ -294,14 +294,17 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
-    def logs_unsubscribe(self, subscription) -> bool:
-        return self._unsubscribe("logs", subscription)
+    def transaction_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("transaction", subscription)
 
     def account_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("account", subscription)
 
     def block_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("block", subscription)
+
+    def logs_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("logs", subscription)
 
     def program_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("program", subscription)
@@ -311,9 +314,6 @@ class WebSocketClient:
 
     def signature_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("signature", subscription)
-
-    def transaction_unsubscribe(self, subscription) -> bool:
-        return self._unsubscribe("transaction", subscription)
 
     def receive(self) -> tuple[dict | None, Notification, int]:
         response = json.loads(self._websocket.recv())
