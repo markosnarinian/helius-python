@@ -87,6 +87,7 @@ class WebSocketClient:
         dataSize: int
 
     MODELS = {
+        "transactionNotification": TransactionNotification,
         "accountNotification": AccountNotification,
         "blockNotification": BlockNotification,
         "logsNotification": LogsNotification,
@@ -94,7 +95,6 @@ class WebSocketClient:
         "rootNotification": RootNotification,
         "signatureNotification": SignatureNotification,
         "slotNotification": SlotNotification,
-        "transactionNotification": TransactionNotification,
     }
 
     def __init__(
