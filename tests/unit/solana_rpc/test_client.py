@@ -862,7 +862,8 @@ def test_get_program_accounts():
             data_slice_offset=0,
             data_slice_length=8,
         )
-    assert accounts[0][0] == "CxELquR1gPP8wHe33gZ4QxqGB3sZ9RSwsJ2KshVewkFY"
+    assert accounts[0].pubkey == "CxELquR1gPP8wHe33gZ4QxqGB3sZ9RSwsJ2KshVewkFY"
+    assert accounts[0].account.lamports == 5_000_000_000
     assert body(route)["method"] == "getProgramAccounts"
     assert body(route)["params"] == [
         "Program",

@@ -10,6 +10,7 @@ from helius.solana_rpc.models import (
     InflationReward,
     LamportAccount,
     PerformanceSample,
+    ProgramAccount,
     Rewards,
     SignatureStatus,
     Supply,
@@ -187,6 +188,26 @@ def test_performance_sample_validates_aliases():
 
     assert sample.num_non_vote_transactions == 7
     assert sample.sample_period_secs == 60
+
+
+def test_program_account_validates_nested_account():
+    program_account = ProgramAccount.model_validate(
+        {
+            "pubkey": "CxELquR1gPP8wHe33gZ4QxqGB3sZ9RSwsJ2KshVewkFY",
+            "account": {
+                "lamports": 5_000_000_000,
+                "owner": "11111111111111111111111111111111",
+                "data": ["", "base64"],
+                "executable": False,
+                "rentEpoch": 18_446_744_073_709_551_615,
+                "space": 0,
+            },
+        }
+    )
+
+    assert program_account.pubkey == "CxELquR1gPP8wHe33gZ4QxqGB3sZ9RSwsJ2KshVewkFY"
+    assert program_account.account.lamports == 5_000_000_000
+    assert program_account.account.rent_epoch == 18_446_744_073_709_551_615
 
 
 def test_lamport_account_validates_fixture():

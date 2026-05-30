@@ -38,7 +38,7 @@ class BlockNotification(Notification):
 
 class LogsNotification(Notification):
     signature: str
-    err: dict | str
+    err: dict | str | None
     logs: list[str]
 
 
@@ -151,7 +151,7 @@ class WebSocketClient:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exc_value, traceback):
         self.close()
 
     def _send(self, request) -> dict:
@@ -162,7 +162,7 @@ class WebSocketClient:
         response = self._websocket.recv()
         return json.loads(response)
 
-    def _unsubscribe(self, subscription, subscription_type) -> bool:
+    def _unsubscribe(self, subscription_type, subscription) -> bool:
         request = (
             JsonRpcRequest(method=f"{subscription_type}Unsubscribe")
             .add(subscription)
@@ -279,7 +279,6 @@ class WebSocketClient:
             .set("commitment", commitment)
             .build()
         )
-        self._send(request)
         response = self._send(request)
         subscription = response["result"]
         return subscription
@@ -380,10 +379,13 @@ class WebSocketClient:
     def receive(self) -> tuple[dict | None, Notification, int]:
         response = json.loads(self._websocket.recv())
         model = self.MODELS[response["method"]]
-        result = response["result"]
-        subscription = response["subscription"]
-        context = result["context"] if "context" in result else None
-        value = result["value"] if "value" in result else None
+        result = response["params"]["result"]
+        subscription = response["params"]["subscription"]
+        if isinstance(result, dict):
+            context = result.get("context")
+            value = result.get("value")
+        else:
+            context, value = None, None
         if value is not None:
             notification = model.model_validate(value)
         else:
