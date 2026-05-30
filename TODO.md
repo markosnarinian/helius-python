@@ -1,1 +1,2 @@
 - Mangling __
+- WebSocket subscription manager
