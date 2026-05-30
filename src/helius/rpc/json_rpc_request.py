@@ -23,18 +23,18 @@ class JsonRpcRequest:
         self._positional: list[Any] = []
         self._config: dict[str, Any] = {}
 
-    def add(self, value, skip_none: bool = False, strip_none=True):
+    def add(self, value, can_be_none: bool = False):
         # If dict (for example) strip none values to remove the building burden from the function that calls it
         if value is not None:
             self._positional.append(value)
-        elif not skip_none:
+        elif not can_be_none:
             self._positional.append(None)
         return self
 
-    def set(self, key: str, value, skip_none: bool = False):
+    def set(self, key: str, value, can_be_none: bool = False):
         if value is not None:
             self._config.update({key: value})
-        elif not skip_none:
+        elif not can_be_none:
             self._config.update({key: None})
         return self
 
