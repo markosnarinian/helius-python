@@ -35,6 +35,11 @@ class BlockNotification(Notification):
     block: dict | None
 
 
+class ProgramNotification(Notification):
+    pubkey: str
+    account: AccountNotification
+
+
 class TransactionNotification(Notification):
     transaction: dict
     signature: str
@@ -59,10 +64,18 @@ class WebSocketClient:
     class BlockMentionsFilter(TypedDict):
         mentionsAccountOrProgram: str
 
+    class MemcmpFilter(TypedDict):
+        offset: int
+        bytes: str
+
+    class DataSizeFilter(TypedDict):
+        dataSize: int
+
     MODELS = {
         "accountNotification": AccountNotification,
         "blockNotification": BlockNotification,
         "logsNotification": LogsNotification,
+        "programNotification": ProgramNotification,
         "transactionNotification": TransactionNotification,
     }
 
@@ -175,6 +188,27 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def program_subscribe(
+        self,
+        *,
+        program_id: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: Literal["base58", "base64", "base64+zstd", "jsonParsed"]
+        | None = None,
+        filters: list[MemcmpFilter | DataSizeFilter] | None = None,
+    ) -> int:
+        request = (
+            JsonRpcRequest(method="programSubscribe")
+            .add(program_id)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set("filters", filters)
+            .build()
+        )
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def transaction_subscribe(
         self,
         *,
@@ -233,6 +267,9 @@ class WebSocketClient:
 
     def block_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("block", subscription)
+
+    def program_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("program", subscription)
 
     def transaction_unsubscribe(self, subscription):
         return self._unsubscribe("transaction", subscription)
