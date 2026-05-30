@@ -72,6 +72,23 @@ class SlotNotification(Notification):
     slot: int
 
 
+class SlotsUpdatesNotification(Notification):
+    err: str | None = None
+    parent: int | None = None
+    slot: int
+    stats: dict[str, int] | None = None
+    timestamp: int
+    type: Literal[
+        "firstShredReceived",
+        "completed",
+        "createdBank",
+        "frozen",
+        "dead",
+        "optimisticConfirmation",
+        "root",
+    ]
+
+
 class WebSocketClient:
     class MentionsFilter(TypedDict):
         mentions: Annotated[list[str], Field(min_length=1, max_length=1)]
@@ -95,6 +112,7 @@ class WebSocketClient:
         "rootNotification": RootNotification,
         "signatureNotification": SignatureNotification,
         "slotNotification": SlotNotification,
+        "slotsUpdatesNotification": SlotsUpdatesNotification,
     }
 
     def __init__(
@@ -307,6 +325,12 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def slots_updates_subscribe(self) -> int:
+        request = JsonRpcRequest(method="slotsUpdatesSubscribe").build()
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def transaction_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("transaction", subscription)
 
@@ -330,6 +354,9 @@ class WebSocketClient:
 
     def slot_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("slot", subscription)
+
+    def slots_updates_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("slotsUpdates", subscription)
 
     def receive(self) -> tuple[dict | None, Notification, int]:
         response = json.loads(self._websocket.recv())
