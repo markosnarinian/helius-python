@@ -20,6 +20,15 @@ class LogsNotification(Notification):
     logs: list[str]
 
 
+class AccountNotification(Notification):
+    lamports: int
+    owner: str
+    data: list | dict | str
+    executable: bool
+    rent_epoch: int
+    space: int | None = None
+
+
 class TransactionNotification(Notification):
     transaction: dict
     signature: str
@@ -42,6 +51,7 @@ class WebSocketClient:
         mentions: Annotated[list[str], Field(min_length=1, max_length=1)]
 
     MODELS = {
+        "accountNotification": AccountNotification,
         "logsNotification": LogsNotification,
         "transactionNotification": TransactionNotification,
     }
@@ -109,6 +119,25 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def account_subscribe(
+        self,
+        *,
+        pubkey: str,
+        encoding: Literal["base58", "base64", "base64+zstd", "jsonParsed"]
+        | None = None,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+    ) -> int:
+        request = (
+            JsonRpcRequest(method="accountSubscribe")
+            .add(pubkey)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .build()
+        )
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def transaction_subscribe(
         self,
         *,
@@ -161,6 +190,9 @@ class WebSocketClient:
 
     def logs_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("logs", subscription)
+
+    def account_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("account", subscription)
 
     def transaction_unsubscribe(self, subscription):
         return self._unsubscribe("transaction", subscription)
