@@ -122,11 +122,11 @@ wraps it.
   `programSubscribe`, and the rest) is **supported today**; other
   platform features are **in progress**.
 
-> **Current status:** the standard Solana JSON-RPC surface, the
-> WebSocket subscription surface, and the Admin (account management)
-> usage endpoint are implemented today. Support for Helius RPC
-> extensions and the remaining REST endpoints is actively being worked
-> on.
+**Current status:** the standard Solana JSON-RPC surface, the
+WebSocket subscription surface, and the Admin (account management)
+usage endpoint are implemented today. Support for Helius RPC
+extensions and the remaining REST endpoints is actively being worked
+on.
 
 ## Goals
 
