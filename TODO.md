@@ -1,2 +1,3 @@
 - Mangling __
 - WebSocket subscription manager
+- Use typeddicts where useful
