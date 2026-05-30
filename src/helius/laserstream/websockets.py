@@ -29,6 +29,12 @@ class AccountNotification(Notification):
     space: int | None = None
 
 
+class BlockNotification(Notification):
+    slot: int
+    err: dict | None
+    block: dict | None
+
+
 class TransactionNotification(Notification):
     transaction: dict
     signature: str
@@ -50,8 +56,12 @@ class WebSocketClient:
     class MentionsFilter(TypedDict):
         mentions: Annotated[list[str], Field(min_length=1, max_length=1)]
 
+    class BlockMentionsFilter(TypedDict):
+        mentionsAccountOrProgram: str
+
     MODELS = {
         "accountNotification": AccountNotification,
+        "blockNotification": BlockNotification,
         "logsNotification": LogsNotification,
         "transactionNotification": TransactionNotification,
     }
@@ -138,6 +148,33 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def block_subscribe(
+        self,
+        *,
+        filter: Literal["all"] | BlockMentionsFilter,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        encoding: Literal["base58", "base64", "base64+zstd", "jsonParsed"]
+        | None = None,
+        transaction_details: (
+            Literal["full", "signatures", "accounts", "none"] | None
+        ) = None,
+        max_supported_transaction_version: int | None = None,
+        show_rewards: bool | None = None,
+    ) -> int:
+        request = (
+            JsonRpcRequest(method="blockSubscribe")
+            .add(filter)
+            .set("commitment", commitment)
+            .set("encoding", encoding)
+            .set("transactionDetails", transaction_details)
+            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
+            .set("showRewards", show_rewards)
+            .build()
+        )
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def transaction_subscribe(
         self,
         *,
@@ -193,6 +230,9 @@ class WebSocketClient:
 
     def account_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("account", subscription)
+
+    def block_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("block", subscription)
 
     def transaction_unsubscribe(self, subscription):
         return self._unsubscribe("transaction", subscription)
