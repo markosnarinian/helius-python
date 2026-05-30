@@ -117,11 +117,16 @@ wraps it.
   Webhooks API, Mint API, token metadata, address lookups, and beyond.
   **(in progress)**
 - 🚧 **Platform features** — streaming, websockets, and any new
-  capability Helius adds to its API. **(in progress)**
+  capability Helius adds to its API. The full WebSocket subscription
+  surface (`accountSubscribe`, `transactionSubscribe`, `logsSubscribe`,
+  `programSubscribe`, and the rest) is **supported today**; other
+  platform features are **in progress**.
 
-> **Current status:** only the standard Solana JSON-RPC surface is
-> implemented today. Support for Helius RPC extensions, REST endpoints,
-> and platform features is actively being worked on.
+> **Current status:** the standard Solana JSON-RPC surface, the
+> WebSocket subscription surface, and the Admin (account management)
+> usage endpoint are implemented today. Support for Helius RPC
+> extensions and the remaining REST endpoints is actively being worked
+> on.
 
 ## Goals
 
@@ -296,6 +301,72 @@ continuously.
 | `minimumLedgerSlot`                 | `minimum_ledger_slot()`                       | [guide](https://www.helius.dev/docs/rpc/guides/minimumledgerslot), [reference](https://www.helius.dev/docs/api-reference/rpc/http/minimumledgerslot)                                 |
 | `requestAirdrop`                    | `request_airdrop(...)`                        | [guide](https://www.helius.dev/docs/rpc/guides/requestairdrop), [reference](https://www.helius.dev/docs/api-reference/rpc/http/requestairdrop)                                       |
 | `sendTransaction`                   | `send_transaction(...)`                       | [guide](https://www.helius.dev/docs/rpc/guides/sendtransaction), [reference](https://www.helius.dev/docs/api-reference/rpc/http/sendtransaction)                                     |
+
+## WebSocket subscriptions
+
+`WebSocketClient` wraps the Solana/Helius WebSocket subscription surface.
+It connects over `wss://` on construction, exposes one `*_subscribe` /
+`*_unsubscribe` pair per subscription type, and parses incoming
+notifications into typed pydantic models.
+
+```python
+from helius.laserstream.websockets import WebSocketClient
+
+with WebSocketClient(api_key="YOUR_HELIUS_API_KEY") as ws:
+    subscription = ws.account_subscribe(
+        pubkey="So11111111111111111111111111111111111111112",
+        commitment="confirmed",
+    )
+
+    for context, notification, sub in ws.listen():
+        print(notification)  # typed AccountNotification
+
+    ws.account_unsubscribe(subscription)
+```
+
+Like `SolanaRpcClient`, it supports the context-manager protocol and a
+manual `close()`. The constructor defaults to
+`wss://mainnet.helius-rpc.com` and reads `HELIUS_API_KEY` from the
+environment or `.env` when `api_key` is omitted; an optional `proxy` is
+also accepted.
+
+Each `*_subscribe` call returns the integer subscription id. Use
+`receive()` to read a single notification or `listen()` to iterate over
+them; both yield a `(context, notification, subscription)` tuple where
+`notification` is the model below.
+
+| Subscribe method                | Unsubscribe method                | Notification model            | Helius docs                                                                                                                                       |
+| ------------------------------- | --------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `account_subscribe(...)`        | `account_unsubscribe(...)`        | `AccountNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/accountsubscribe)                                                             |
+| `block_subscribe(...)`          | `block_unsubscribe(...)`          | `BlockNotification`           | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/blocksubscribe)                                                               |
+| `logs_subscribe(...)`           | `logs_unsubscribe(...)`           | `LogsNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/logssubscribe)                                                                |
+| `program_subscribe(...)`        | `program_unsubscribe(...)`        | `ProgramNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/programsubscribe)                                                             |
+| `root_subscribe()`              | `root_unsubscribe(...)`           | `RootNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/rootsubscribe)                                                                |
+| `signature_subscribe(...)`      | `signature_unsubscribe(...)`      | `SignatureNotification`       | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/signaturesubscribe)                                                           |
+| `slot_subscribe()`              | `slot_unsubscribe(...)`           | `SlotNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsubscribe)                                                                |
+| `slots_updates_subscribe()`     | `slots_updates_unsubscribe(...)`  | `SlotsUpdatesNotification`    | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsupdatessubscribe)                                                        |
+| `vote_subscribe()`              | `vote_unsubscribe(...)`           | `VoteNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/votesubscribe)                                                                |
+| `transaction_subscribe(...)`    | `transaction_unsubscribe(...)`    | `TransactionNotification`     | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotunsubscribe)                                                                                       |
+
+## Admin API
+
+`AccountManagementClient` wraps the Helius admin API. Today it exposes
+project credit usage via `get_project_usage(...)`, which returns a typed
+`ProjectUsage` model.
+
+```python
+from helius.admin.admin import AccountManagementClient
+
+with AccountManagementClient(api_key="YOUR_HELIUS_API_KEY") as admin:
+    usage = admin.get_project_usage(project_id="YOUR_PROJECT_ID")
+    print(usage.credits_remaining, usage.usage.rpc)
+```
+
+The `project_id` can be passed per call or set once on the constructor;
+if neither is provided, `get_project_usage` raises `ValueError`. The
+client defaults to `https://admin-api.helius.xyz` and, like the others,
+supports the context-manager protocol, a manual `close()`, and reads
+`HELIUS_API_KEY` from the environment or `.env`.
 
 ## License
 
