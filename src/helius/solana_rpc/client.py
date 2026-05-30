@@ -1,6 +1,5 @@
 from os import environ
 from typing import Annotated, Literal
-from weakref import ProxyTypes
 
 import httpx
 from dotenv import dotenv_values
@@ -37,6 +36,7 @@ class SolanaRpcClient:
         *,
         base_url: str = "https://mainnet.helius-rpc.com",
         api_key: str | None = None,
+        headers: dict[str, str] | None = None,
         proxy: str | None = None,
     ) -> None:
         base_url = base_url
@@ -49,7 +49,7 @@ class SolanaRpcClient:
         if not api_key:
             raise ValueError("No API key provided.")
         self._client = httpx.Client(
-            base_url=base_url, params={"api-key": api_key}, proxy=proxy
+            base_url=base_url, params={"api-key": api_key}, headers=headers, proxy=proxy
         )
 
     def __enter__(self):
