@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import Annotated, Generator, Literal, TypedDict
+from typing import Annotated, Literal, TypedDict
 
 import httpx
 from dotenv import dotenv_values

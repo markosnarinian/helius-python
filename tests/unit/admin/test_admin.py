@@ -2,8 +2,7 @@ import httpx
 import pytest
 import respx
 
-from helius.admin.admin import AccountManagementClient, ProjectUsage
-
+from helius.admin import AccountManagementClient, ProjectUsage
 
 PROJECT_USAGE_RESPONSE = {
     "creditsRemaining": 487500,
@@ -41,9 +40,9 @@ def test_project_usage_parses_docs_response():
 
 @respx.mock
 def test_get_project_usage_sends_api_key_and_project_id():
-    route = respx.get("https://admin-api.helius.xyz/v0/admin/projects/{id}/usage/").mock(
-        return_value=httpx.Response(200, json=PROJECT_USAGE_RESPONSE)
-    )
+    route = respx.get(
+        "https://admin-api.helius.xyz/v0/admin/projects/{id}/usage/"
+    ).mock(return_value=httpx.Response(200, json=PROJECT_USAGE_RESPONSE))
 
     with AccountManagementClient(api_key="test") as client:
         usage = client.get_project_usage("project-1")
@@ -57,11 +56,13 @@ def test_get_project_usage_sends_api_key_and_project_id():
 
 @respx.mock
 def test_get_project_usage_uses_default_project_id():
-    route = respx.get("https://admin-api.helius.xyz/v0/admin/projects/{id}/usage/").mock(
-        return_value=httpx.Response(200, json=PROJECT_USAGE_RESPONSE)
-    )
+    route = respx.get(
+        "https://admin-api.helius.xyz/v0/admin/projects/{id}/usage/"
+    ).mock(return_value=httpx.Response(200, json=PROJECT_USAGE_RESPONSE))
 
-    with AccountManagementClient(api_key="test", project_id="default-project") as client:
+    with AccountManagementClient(
+        api_key="test", project_id="default-project"
+    ) as client:
         client.get_project_usage()
 
     assert route.calls.last.request.url.params["id"] == "default-project"
