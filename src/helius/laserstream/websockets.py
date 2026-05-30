@@ -46,6 +46,15 @@ class TransactionNotification(Notification):
     slot: int
 
 
+class SignatureNotification(Notification):
+    value: dict[str, None | str]
+
+    @model_validator(mode="before")
+    @classmethod
+    def wrap_value(cls, data):
+        return {"value": data}
+
+
 class RootNotification(Notification):
     root: int
 
@@ -77,6 +86,7 @@ class WebSocketClient:
         "logsNotification": LogsNotification,
         "programNotification": ProgramNotification,
         "rootNotification": RootNotification,
+        "signatureNotification": SignatureNotification,
         "transactionNotification": TransactionNotification,
     }
 
@@ -266,6 +276,24 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
+    def signature_subscribe(
+        self,
+        *,
+        signature: str,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        enable_received_notification: bool | None = None,
+    ) -> int:
+        request = (
+            JsonRpcRequest(method="signatureSubscribe")
+            .add(signature)
+            .set("commitment", commitment)
+            .set("enableReceivedNotification", enable_received_notification)
+            .build()
+        )
+        response = self._send(request)
+        subscription = response["result"]
+        return subscription
+
     def logs_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("logs", subscription)
 
@@ -280,6 +308,9 @@ class WebSocketClient:
 
     def root_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("root", subscription)
+
+    def signature_unsubscribe(self, subscription) -> bool:
+        return self._unsubscribe("signature", subscription)
 
     def transaction_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("transaction", subscription)
