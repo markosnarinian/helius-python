@@ -5,6 +5,7 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import Field, TypeAdapter, validate_call
 
+from helius.solana_rpc.json_rpc_request import JsonRpcRequest
 from helius.solana_rpc.models import (
     Account,
     Block,
@@ -26,7 +27,6 @@ from helius.solana_rpc.models import (
     TransactionSignature,
     VotingAccount,
 )
-from helius.solana_rpc.rpc_request import RpcRequest
 
 
 # TODO: Use Pydantic typed dict where useful
@@ -86,7 +86,7 @@ class SolanaRpcClient:
                 "Set both data_slice_length and data_slice_offset or neither."
             )
         request = (
-            RpcRequest(method="getAccountInfo")
+            JsonRpcRequest(method="getAccountInfo")
             .add(public_key)
             .set("commitment", commitment)
             .set("encoding", encoding)
@@ -115,7 +115,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> tuple[dict, int]:
         request = (
-            RpcRequest(method="getBalance")
+            JsonRpcRequest(method="getBalance")
             .add(public_key)
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
@@ -139,7 +139,7 @@ class SolanaRpcClient:
         max_supported_transcation_version: int | None = None,
     ) -> Block | None:
         request = (
-            RpcRequest(method="getBlock")
+            JsonRpcRequest(method="getBlock")
             .add(slot)
             .set("commitment", commitment)
             .set("encoding", encoding)
@@ -157,7 +157,7 @@ class SolanaRpcClient:
         *,
         slot: int,
     ) -> BlockCommitment:
-        request = RpcRequest(method="getBlockCommitment").add(slot).build()
+        request = JsonRpcRequest(method="getBlockCommitment").add(slot).build()
         response = self._send(request)
         block_commitment = BlockCommitment.model_validate(response["result"])
         return block_commitment
@@ -169,7 +169,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> int:
         request = (
-            RpcRequest(method="getBlockHeight")
+            JsonRpcRequest(method="getBlockHeight")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -202,7 +202,7 @@ class SolanaRpcClient:
             if last_slot is not None:
                 range.update({"lastSlot": last_slot})
         request = (
-            RpcRequest(method="getBlockProduction")
+            JsonRpcRequest(method="getBlockProduction")
             .set("commitment", commitment)
             .set("range", range)
             .set("identity", identity)
@@ -225,7 +225,7 @@ class SolanaRpcClient:
         The range between start_slot and end_slot (or latest slot if end_slot is omitted) must not exceed 500,000 slots.
         """
         request = (
-            RpcRequest(method="getBlocks")
+            JsonRpcRequest(method="getBlocks")
             .add(start_slot)
             .add(end_slot)
             .set("commitment", commitment)
@@ -242,7 +242,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> list[int]:
         request = (
-            RpcRequest(method="getBlocksWithLimit")
+            JsonRpcRequest(method="getBlocksWithLimit")
             .add(start_slot)
             .add(limit)
             .set("commitment", commitment)
@@ -252,12 +252,12 @@ class SolanaRpcClient:
         return response["result"]
 
     def get_block_time(self, *, slot: int) -> int | None:
-        request = RpcRequest(method="getBlockTime").add(slot).build()
+        request = JsonRpcRequest(method="getBlockTime").add(slot).build()
         response = self._send(request)
         return response["result"]
 
     def get_cluster_nodes(self) -> list[ClusterNode]:
-        request = RpcRequest(method="getClusterNodes").build()
+        request = JsonRpcRequest(method="getClusterNodes").build()
         response = self._send(request)
         ta = TypeAdapter(list[ClusterNode])
         cluster_nodes = ta.validate_python(response["result"])
@@ -270,7 +270,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> EpochInfo:
         request = (
-            RpcRequest(method="getEpochInfo")
+            JsonRpcRequest(method="getEpochInfo")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -280,7 +280,7 @@ class SolanaRpcClient:
         return epoch_info
 
     def get_epoch_schedule(self) -> EpochSchedule:
-        request = RpcRequest(method="getEpochSchedule").build()
+        request = JsonRpcRequest(method="getEpochSchedule").build()
         response = self._send(request)
         epoch_schedule = EpochSchedule.model_validate(response["result"])
         return epoch_schedule
@@ -293,7 +293,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> tuple[dict, int | None]:
         request = (
-            RpcRequest(method="getFeeForMessage")
+            JsonRpcRequest(method="getFeeForMessage")
             .add(message)
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
@@ -305,17 +305,17 @@ class SolanaRpcClient:
         return context, value
 
     def get_first_available_block(self) -> int:
-        request = RpcRequest(method="getFirstAvailableBlock").build()
+        request = JsonRpcRequest(method="getFirstAvailableBlock").build()
         response = self._send(request)
         return response["result"]
 
     def get_genesis_hash(self) -> str:
-        request = RpcRequest(method="getGenesisHash").build()
+        request = JsonRpcRequest(method="getGenesisHash").build()
         response = self._send(request)
         return response["result"]
 
     def get_health(self) -> bool:
-        request = RpcRequest(method="getHealth").build()
+        request = JsonRpcRequest(method="getHealth").build()
         response = self._send(request)
         if "result" in response and response["result"] == "ok":
             return True
@@ -323,12 +323,12 @@ class SolanaRpcClient:
             return False
 
     def get_highest_snapshot_slot(self) -> dict:
-        request = RpcRequest(method="getHighestSnapshotSlot").build()
+        request = JsonRpcRequest(method="getHighestSnapshotSlot").build()
         response = self._send(request)
         return response["result"]
 
     def get_identity(self) -> str:
-        request = RpcRequest(method="getIdentity").build()
+        request = JsonRpcRequest(method="getIdentity").build()
         response = self._send(request)
         identity = response["result"]["identity"]
         return identity
@@ -339,7 +339,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> InflationGovernor:
         request = (
-            RpcRequest(method="getInflationGovernor")
+            JsonRpcRequest(method="getInflationGovernor")
             .set("commitment", commitment)
             .build()
         )
@@ -348,7 +348,7 @@ class SolanaRpcClient:
         return inflation_governor
 
     def get_inflation_rate(self) -> InflationRate:
-        request = RpcRequest(method="getInflationRate").build()
+        request = JsonRpcRequest(method="getInflationRate").build()
         response = self._send(request)
         inflation_rate = InflationRate.model_validate(response["result"])
         return inflation_rate
@@ -362,7 +362,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> list[InflationReward | None]:
         request = (
-            RpcRequest(method="getInflationReward")
+            JsonRpcRequest(method="getInflationReward")
             .add(addresses)
             .set("commitment", commitment)
             .set("epoch", epoch)
@@ -381,7 +381,7 @@ class SolanaRpcClient:
         filter: Literal["circulating", "nonCirculating"] | None = None,
     ) -> tuple[dict, list[LamportAccount]]:
         request = (
-            RpcRequest(method="getLargestAccounts")
+            JsonRpcRequest(method="getLargestAccounts")
             .set("commitment", commitment)
             .set("filter", filter)
             .build()
@@ -400,7 +400,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> tuple[dict, str, int]:
         request = (
-            RpcRequest(method="getLatestBlockhash")
+            JsonRpcRequest(method="getLatestBlockhash")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -420,7 +420,7 @@ class SolanaRpcClient:
         identity: str | None = None,
     ) -> dict[str, list[int]] | None:
         request = (
-            RpcRequest(method="getLeaderSchedule")
+            JsonRpcRequest(method="getLeaderSchedule")
             .add(slot)
             .set("commitment", commitment)
             .set("identity", identity)
@@ -431,13 +431,13 @@ class SolanaRpcClient:
         return result
 
     def get_max_retransmit_slot(self) -> int:
-        request = RpcRequest(method="getMaxRetransmitSlot").build()
+        request = JsonRpcRequest(method="getMaxRetransmitSlot").build()
         response = self._send(request)
         result = response["result"]
         return result
 
     def get_max_shred_insert_slot(self) -> int:
-        request = RpcRequest(method="getMaxShredInsertSlot").build()
+        request = JsonRpcRequest(method="getMaxShredInsertSlot").build()
         response = self._send(request)
         result = response["result"]
         return result
@@ -449,7 +449,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> int:
         request = (
-            RpcRequest(method="getMinimumBalanceForRentExemption")
+            JsonRpcRequest(method="getMinimumBalanceForRentExemption")
             .add(data_length)
             .set("commitment", commitment)
             .build()
@@ -482,7 +482,7 @@ class SolanaRpcClient:
                 "Data slice is only available for base58, base64, or base64+zstd encodings."
             )
         request = (
-            RpcRequest(method="getMultipleAccounts")
+            JsonRpcRequest(method="getMultipleAccounts")
             .add(pubkeys)
             .set("commitment", commitment)
             .set("encoding", encoding)
@@ -523,7 +523,7 @@ class SolanaRpcClient:
                 "Set both data_slice_length and data_slice_offset or neither."
             )
         request = (
-            RpcRequest(method="getProgramAccounts")
+            JsonRpcRequest(method="getProgramAccounts")
             .add(program_id)
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
@@ -550,7 +550,9 @@ class SolanaRpcClient:
         *,
         limit: int | None = None,
     ) -> list[PerformanceSample]:
-        request = RpcRequest(method="getRecentPerformanceSamples").add(limit).build()
+        request = (
+            JsonRpcRequest(method="getRecentPerformanceSamples").add(limit).build()
+        )
         response = self._send(request)
         ta = TypeAdapter(list[PerformanceSample])
         return ta.validate_python(response["result"])
@@ -561,7 +563,7 @@ class SolanaRpcClient:
         locked_writable_accounts: list[str] | None = None,
     ) -> list[tuple[int, int]]:
         request = (
-            RpcRequest(method="getRecentPrioritizationFees")
+            JsonRpcRequest(method="getRecentPrioritizationFees")
             .add(locked_writable_accounts)
             .build()
         )
@@ -580,7 +582,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> list[TransactionSignature]:
         request = (
-            RpcRequest(method="getSignaturesForAddress")
+            JsonRpcRequest(method="getSignaturesForAddress")
             .add(address)
             .set("limit", limit)
             .set("before", before)
@@ -601,7 +603,7 @@ class SolanaRpcClient:
         search_transaction_history: bool | None = None,
     ) -> tuple[dict, list[SignatureStatus | None]]:
         request = (
-            RpcRequest(method="getSignatureStatuses")
+            JsonRpcRequest(method="getSignatureStatuses")
             .add(signatures)
             .set("searchTransactionHistory", search_transaction_history)
             .build()
@@ -621,7 +623,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> int:
         request = (
-            RpcRequest(method="getSlot")
+            JsonRpcRequest(method="getSlot")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -636,7 +638,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> str:
         request = (
-            RpcRequest(method="getSlotLeader")
+            JsonRpcRequest(method="getSlotLeader")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -651,7 +653,9 @@ class SolanaRpcClient:
         start_slot: int,
         limit: Annotated[int, Field(ge=1, le=5000)],
     ) -> list[str]:
-        request = RpcRequest(method="getSlotLeaders").add(start_slot).add(limit).build()
+        request = (
+            JsonRpcRequest(method="getSlotLeaders").add(start_slot).add(limit).build()
+        )
         response = self._send(request)
         return response["result"]
 
@@ -661,7 +665,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, int]:
         request = (
-            RpcRequest(method="getStakeMinimumDelegation")
+            JsonRpcRequest(method="getStakeMinimumDelegation")
             .set("commitment", commitment)
             .build()
         )
@@ -677,7 +681,7 @@ class SolanaRpcClient:
         exclude_non_circulating_accounts_list: bool | None = None,
     ) -> tuple[dict, Supply]:
         request = (
-            RpcRequest(method="getSupply")
+            JsonRpcRequest(method="getSupply")
             .set("commitment", commitment)
             .set(
                 "excludeNonCirculatingAccountsList",
@@ -699,7 +703,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, TokenAccountBalance]:
         request = (
-            RpcRequest(method="getTokenAccountBalance")
+            JsonRpcRequest(method="getTokenAccountBalance")
             .add(token_account)
             .set("commitment", commitment)
             .build()
@@ -735,7 +739,7 @@ class SolanaRpcClient:
             )
         filter = {"mint": mint} if mint is not None else {"programId": program_id}
         request = (
-            RpcRequest(method="getTokenAccountsByDelegate")
+            JsonRpcRequest(method="getTokenAccountsByDelegate")
             .add(delegate_pub_key)
             .add(filter)
             .set("commitment", commitment)
@@ -785,7 +789,7 @@ class SolanaRpcClient:
             )
         filter = {"mint": mint} if mint is not None else {"programId": program_id}
         request = (
-            RpcRequest(method="getTokenAccountsByOwner")
+            JsonRpcRequest(method="getTokenAccountsByOwner")
             .add(owner_pub_key)
             .add(filter)
             .set("commitment", commitment)
@@ -818,7 +822,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, list[TokenAccount]]:
         request = (
-            RpcRequest(method="getTokenLargestAccounts")
+            JsonRpcRequest(method="getTokenLargestAccounts")
             .add(mint)
             .set("commitment", commitment)
             .build()
@@ -836,7 +840,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
     ) -> tuple[dict, TokenSupply]:
         request = (
-            RpcRequest(method="getTokenSupply")
+            JsonRpcRequest(method="getTokenSupply")
             .add(mint_address)
             .set("commitment", commitment)
             .build()
@@ -855,7 +859,7 @@ class SolanaRpcClient:
         max_supported_transaction_version: int | None = None,
     ) -> Transaction:
         request = (
-            RpcRequest(method="getTransaction")
+            JsonRpcRequest(method="getTransaction")
             .add(transaction_signature)
             .set("commitment", commitment)
             .set("encoding", encoding)
@@ -873,7 +877,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> int:
         request = (
-            RpcRequest(method="getTransactionCount")
+            JsonRpcRequest(method="getTransactionCount")
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .build()
@@ -882,7 +886,7 @@ class SolanaRpcClient:
         return response["result"]
 
     def get_version(self) -> tuple[str, int]:
-        request = RpcRequest(method="getVersion").build()
+        request = JsonRpcRequest(method="getVersion").build()
         response = self._send(request)
         result = response["result"]
         return result["solana-core"], result["feature-set"]
@@ -896,7 +900,7 @@ class SolanaRpcClient:
         delinquent_slot_distance: int | None = None,
     ) -> tuple[list[VotingAccount], list[VotingAccount]]:
         request = (
-            RpcRequest(method="getVoteAccounts")
+            JsonRpcRequest(method="getVoteAccounts")
             .set("commitment", commitment)
             .set("votePubkey", vote_pubkey)
             .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
@@ -917,7 +921,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> tuple[dict, bool]:
         request = (
-            RpcRequest(method="isBlockhashValid")
+            JsonRpcRequest(method="isBlockhashValid")
             .add(blockhash)
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
@@ -929,7 +933,7 @@ class SolanaRpcClient:
         return context, value
 
     def minimum_ledger_slot(self) -> int:
-        request = RpcRequest(method="minimumLedgerSlot").build()
+        request = JsonRpcRequest(method="minimumLedgerSlot").build()
         response = self._send(request)
         return response["result"]
 
@@ -944,7 +948,7 @@ class SolanaRpcClient:
         Only available on Devnet and Testnet, not Mainnet Beta.
         """
         request = (
-            RpcRequest(method="requestAirdrop")
+            JsonRpcRequest(method="requestAirdrop")
             .add(public_key)
             .add(lamports)
             .set("commitment", commitment)
@@ -966,7 +970,7 @@ class SolanaRpcClient:
         min_context_slot: int | None = None,
     ) -> str:
         request = (
-            RpcRequest(method="sendTransaction")
+            JsonRpcRequest(method="sendTransaction")
             .add(transaction)
             .set("encoding", encoding)
             .set("skipPreflight", skip_preflight)
