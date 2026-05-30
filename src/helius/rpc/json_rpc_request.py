@@ -27,14 +27,14 @@ class JsonRpcRequest:
         # If dict (for example) strip none values to remove the building burden from the function that calls it
         if value is not None:
             self._positional.append(value)
-        elif not can_be_none:
+        elif can_be_none:
             self._positional.append(None)
         return self
 
     def set(self, key: str, value, can_be_none: bool = False):
         if value is not None:
             self._config.update({key: value})
-        elif not can_be_none:
+        elif can_be_none:
             self._config.update({key: None})
         return self
 
