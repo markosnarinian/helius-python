@@ -392,7 +392,7 @@ class WebSocketClient:
             notification = model.model_validate(result)
         return context, notification, subscription
 
-    def listen(self) -> Generator[tuple[dict | None, Notification, int]]:
+    def listen(self):
         while True:
             context, notification, subscription = self.receive()
             yield context, notification, subscription
