@@ -1405,6 +1405,95 @@ def test_get_transactions_for_address_rejects_out_of_range_limit():
 
 
 # ---------------------------------------------------------------------------
+# get_transfers_by_address
+# ---------------------------------------------------------------------------
+
+
+@respx.mock
+def test_get_transfers_by_address():
+    route = mock_rpc(
+        {
+            "data": [
+                {
+                    "signature": "5GEX7Q3X5Q8yJGbKYoR7mtzQmG8tpoEwzjPgqVmn3y5xg3y",
+                    "slot": 315073428,
+                    "blockTime": 1736159420,
+                    "type": "transfer",
+                    "fromUserAccount": "7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx",
+                    "toUserAccount": "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+                    "fromTokenAccount": "HcvK3EJ74iM9g11cUgsaPvLSrhCvCwcrWxBNd87LsC1x",
+                    "toTokenAccount": "CBcYniR9G9CN3zGMnwNE4SWbqkYWvCFVreEob9xHnQCY",
+                    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "amount": "2500000",
+                    "decimals": 6,
+                    "uiAmount": "2.5",
+                    "confirmationStatus": "finalized",
+                    "transactionIdx": 35,
+                    "instructionIdx": 1,
+                    "innerInstructionIdx": 0,
+                }
+            ],
+            "paginationToken": "315073428:35:1:0:splTransfer",
+        }
+    )
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transfers_by_address(
+            address="86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+            with_address="7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx",
+            direction="in",
+            mint="EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            sol_mode="separate",
+            filters={
+                "amount": {"gte": 1000000000, "lt": 10000000000},
+                "blockTime": {"gte": 1735718400},
+            },
+            limit=50,
+            pagination_token="315069220:308:2:1:splTransfer",
+            sort_order="desc",
+        )
+    assert data[0]["signature"].startswith("5GEX")
+    assert data[0]["mint"] == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    assert pagination_token == "315073428:35:1:0:splTransfer"
+    assert body(route)["method"] == "getTransfersByAddress"
+    assert body(route)["params"] == [
+        "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+        {
+            "with": "7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx",
+            "direction": "in",
+            "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+            "solMode": "separate",
+            "filters": {
+                "amount": {"gte": 1000000000, "lt": 10000000000},
+                "blockTime": {"gte": 1735718400},
+            },
+            "limit": 50,
+            "paginationToken": "315069220:308:2:1:splTransfer",
+            "sortOrder": "desc",
+        },
+    ]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transfers_by_address_minimal():
+    route = mock_rpc({"data": [], "paginationToken": None})
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transfers_by_address(address="Addr")
+    assert data == []
+    assert pagination_token is None
+    assert body(route)["params"] == ["Addr"]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transfers_by_address_rejects_out_of_range_limit():
+    mock_rpc({"data": [], "paginationToken": None})
+    with SolanaRpcClient(api_key="test") as client:
+        with pytest.raises(Exception):
+            client.get_transfers_by_address(address="Addr", limit=101)
+
+
+# ---------------------------------------------------------------------------
 # get_version
 # ---------------------------------------------------------------------------
 
