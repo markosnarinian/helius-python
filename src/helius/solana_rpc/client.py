@@ -1,5 +1,5 @@
 from os import environ
-from typing import Annotated, Literal
+from typing import Annotated, Literal, TypedDict
 
 import httpx
 from dotenv import dotenv_values
@@ -28,6 +28,57 @@ from helius.solana_rpc.models import (
     TransactionSignature,
     VotingAccount,
 )
+
+
+class SlotFilter(TypedDict, total=False):
+    gte: int
+    gt: int
+    lte: int
+    lt: int
+
+
+class BlockTimeFilter(TypedDict, total=False):
+    gte: int
+    gt: int
+    lte: int
+    lt: int
+    eq: int
+
+
+class SignatureFilter(TypedDict, total=False):
+    gte: str
+    gt: str
+    lte: str
+    lt: str
+
+
+class AmountFilter(TypedDict, total=False):
+    gt: int
+    gte: int
+    lt: int
+    lte: int
+
+
+# Functional syntax because "with" is a reserved keyword.
+TokenTransferFilter = TypedDict(
+    "TokenTransferFilter",
+    {
+        "with": str,
+        "direction": Literal["in", "out", "any"],
+        "mint": str,
+        "amount": AmountFilter,
+    },
+    total=False,
+)
+
+
+class TransactionFilters(TypedDict, total=False):
+    slot: SlotFilter
+    blockTime: BlockTimeFilter
+    signature: SignatureFilter
+    status: Literal["succeeded", "failed", "any"]
+    tokenAccounts: Literal["none", "balanceChanged", "all"]
+    tokenTransfer: TokenTransferFilter
 
 
 # TODO: Use Pydantic typed dict where useful
@@ -886,6 +937,39 @@ class SolanaRpcClient:
         )
         response = self._send(request)
         return response["result"]
+
+    @validate_call
+    def get_transactions_for_address(
+        self,
+        *,
+        address: str,
+        transaction_details: Literal["signatures", "full"] | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+        commitment: Literal["confirmed", "finalized"] | None = None,
+        min_context_slot: int | None = None,
+        limit: Annotated[int, Field(ge=1, le=1000)] | None = None,
+        pagination_token: str | None = None,
+        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
+        max_supported_transaction_version: int | None = None,
+        filters: TransactionFilters | None = None,
+    ) -> tuple[list[dict], str | None]:
+        request = (
+            JsonRpcRequest(method="getTransactionsForAddress")
+            .add(address)
+            .set("transactionDetails", transaction_details)
+            .set("sortOrder", sort_order)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .set("limit", limit)
+            .set("paginationToken", pagination_token)
+            .set("encoding", encoding)
+            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
+            .set("filters", filters)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        return result["data"], result["paginationToken"]
 
     def get_version(self) -> tuple[str, int]:
         request = JsonRpcRequest(method="getVersion").build()

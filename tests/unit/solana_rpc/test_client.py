@@ -1334,6 +1334,77 @@ def test_get_transaction_count():
 
 
 # ---------------------------------------------------------------------------
+# get_transactions_for_address
+# ---------------------------------------------------------------------------
+
+
+@respx.mock
+def test_get_transactions_for_address():
+    route = mock_rpc(
+        {
+            "data": [
+                {
+                    "signature": "5h6xBEauJ3PK6SWCZ1PGCzN3gAPdAHWyRqQqdDMNLdSQQRuHFpktzq1nzCvL7pxDqRan",
+                    "slot": 1055,
+                    "transactionIndex": 5,
+                    "err": None,
+                    "memo": None,
+                    "blockTime": 1633036800,
+                    "confirmationStatus": "finalized",
+                }
+            ],
+            "paginationToken": "1055:5",
+        }
+    )
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transactions_for_address(
+            address="Addr",
+            transaction_details="signatures",
+            sort_order="desc",
+            limit=1,
+            filters={
+                "status": "succeeded",
+                "tokenTransfer": {"with": "Other", "direction": "in"},
+            },
+        )
+    assert data[0]["signature"].startswith("5h6x")
+    assert pagination_token == "1055:5"
+    assert body(route)["method"] == "getTransactionsForAddress"
+    assert body(route)["params"] == [
+        "Addr",
+        {
+            "transactionDetails": "signatures",
+            "sortOrder": "desc",
+            "limit": 1,
+            "filters": {
+                "status": "succeeded",
+                "tokenTransfer": {"with": "Other", "direction": "in"},
+            },
+        },
+    ]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transactions_for_address_minimal():
+    route = mock_rpc({"data": [], "paginationToken": None})
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transactions_for_address(address="Addr")
+    assert data == []
+    assert pagination_token is None
+    assert body(route)["params"] == ["Addr"]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transactions_for_address_rejects_out_of_range_limit():
+    mock_rpc({"data": [], "paginationToken": None})
+    with SolanaRpcClient(api_key="test") as client:
+        with pytest.raises(Exception):
+            client.get_transactions_for_address(address="Addr", limit=1001)
+
+
+# ---------------------------------------------------------------------------
 # get_version
 # ---------------------------------------------------------------------------
 
