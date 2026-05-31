@@ -113,7 +113,7 @@ For methods with branching logic (e.g. `get_block_production`, `get_token_accoun
 ## Running
 
 ```bash
-pytest
+.venv/bin/pytest
 ```
 
 All tests must pass and there must be no real network traffic. If a test fails because it tried to hit the network, that's a bug in the test — add the missing `@respx.mock` or `respx` route.
