@@ -7,7 +7,7 @@ polls `getSignatureStatuses` until the airdrop transaction reaches a
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/devnet_airdrop.py <WALLET_ADDRESS> [--sol 1.0]
+    python examples/solana_rpc/devnet_airdrop.py <WALLET_ADDRESS> [--sol 1.0]
 
 Note:
     `requestAirdrop` is only available on Devnet and Testnet — never on
@@ -23,6 +23,8 @@ from __future__ import annotations
 import argparse
 import sys
 import time
+
+import httpx
 
 from helius.solana_rpc import SolanaRpcClient
 
@@ -45,20 +47,40 @@ def main() -> int:
         default=30.0,
         help="Seconds to wait for confirmation (default: 30)",
     )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Validate arguments and print the planned airdrop without sending it",
+    )
     args = parser.parse_args()
     lamports = int(args.sol * LAMPORTS_PER_SOL)
+
+    if args.dry_run:
+        print("Would request devnet airdrop with:")
+        print(f"  address={args.address}")
+        print(f"  sol={args.sol}")
+        print(f"  lamports={lamports}")
+        print(f"  timeout={args.timeout}")
+        return 0
 
     client = SolanaRpcClient(base_url=DEVNET_URL)
     try:
         print(f"Requesting {args.sol} SOL airdrop to {args.address} on devnet...")
-        signature = client.request_airdrop(args.address, lamports)
+        try:
+            signature = client.request_airdrop(public_key=args.address, lamports=lamports)
+        except httpx.HTTPStatusError as exc:
+            print(
+                f"HTTP {exc.response.status_code}: devnet airdrop request was rejected.",
+                file=sys.stderr,
+            )
+            return 2
         print(f"  signature: {signature}")
 
         deadline = time.monotonic() + args.timeout
         status = None
         while time.monotonic() < deadline:
             _ctx, statuses = client.get_signature_statuses(
-                [signature], search_transaction_history=True
+                signatures=[signature], search_transaction_history=True
             )
             status = statuses[0]
             if status is not None and status.confirmation_status in (
@@ -79,7 +101,7 @@ def main() -> int:
             return 1
         print(f"  status: {status.confirmation_status} at slot {status.slot}")
 
-        _ctx, balance = client.get_balance(args.address)
+        _ctx, balance = client.get_balance(public_key=args.address)
         print(f"Post-airdrop balance: {balance / LAMPORTS_PER_SOL:.9f} SOL")
     finally:
         client.close()

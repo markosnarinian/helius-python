@@ -3,11 +3,11 @@
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/wallet_tracker.py <WALLET_ADDRESS> [--limit 20]
+    python examples/solana_rpc/wallet_tracker.py <WALLET_ADDRESS> [--limit 20]
 
 Example (Helius's own treasury-ish address, replace with any):
 
-    python examples/wallet_tracker.py 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+    python examples/solana_rpc/wallet_tracker.py 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
 
 It prints:
     - SOL balance (in SOL, not lamports)
@@ -43,7 +43,7 @@ def main() -> int:
 
     with SolanaRpcClient() as client:  # reads HELIUS_API_KEY from env / .env
         # --- SOL balance ---------------------------------------------------
-        _ctx, lamports = client.get_balance(args.address)
+        _ctx, lamports = client.get_balance(public_key=args.address)
         print(f"\n=== {args.address} ===\n")
         print(
             f"SOL balance: {lamports / LAMPORTS_PER_SOL:.9f} SOL "
@@ -75,7 +75,7 @@ def main() -> int:
             print("SPL token accounts: none with non-zero balance.\n")
 
         # --- Recent activity ----------------------------------------------
-        sigs = client.get_signatures_for_address(args.address, limit=args.limit)
+        sigs = client.get_signatures_for_address(address=args.address, limit=args.limit)
         print(f"Last {len(sigs)} signatures:")
         for sig in sigs:
             ts = (

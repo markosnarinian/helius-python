@@ -8,8 +8,8 @@ breakdown of successful vs. failed transactions plus total fees paid.
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/block_explorer.py
-    python examples/block_explorer.py --slot 250000000
+    python examples/solana_rpc/block_explorer.py
+    python examples/solana_rpc/block_explorer.py --slot 250000000
 
 Uses (with `with`):
     get_slot, get_block.
@@ -43,9 +43,10 @@ def main() -> int:
             else helius.get_slot(commitment="finalized")
         )
         block = helius.get_block(
-            slot,
+            slot=slot,
             commitment="finalized",
             encoding="jsonParsed",
+            rewards=False,
             max_supported_transcation_version=0,
         )
 

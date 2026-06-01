@@ -12,8 +12,8 @@ sample only counts transactions that locked those accounts as writable
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/priority_fees.py
-    python examples/priority_fees.py --account <PUBKEY> --account <PUBKEY>
+    python examples/solana_rpc/priority_fees.py
+    python examples/solana_rpc/priority_fees.py --account <PUBKEY> --account <PUBKEY>
 
 Uses (with `with`):
     get_recent_prioritization_fees.

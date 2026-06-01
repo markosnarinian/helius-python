@@ -7,11 +7,15 @@ Given a mint address, prints:
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/token_inspector.py <MINT_ADDRESS>
+    python examples/solana_rpc/token_inspector.py <MINT_ADDRESS>
 
-Example with USDC:
+Example with a small-holder-count mint:
 
-    python examples/token_inspector.py EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+    python examples/solana_rpc/token_inspector.py J5iyNuTa6zqqA62Xe4h1VBvcBW5CTSNNva3QPh8DU5RV
+
+Note:
+    Very large mints may be rejected by `getTokenLargestAccounts` if the
+    upstream RPC would need to scan too many accounts.
 
 Uses (with `try/finally`):
     get_token_supply, get_token_largest_accounts.
@@ -22,6 +26,8 @@ from __future__ import annotations
 import argparse
 import sys
 
+import httpx
+
 from helius.solana_rpc import SolanaRpcClient
 
 
@@ -31,9 +37,10 @@ def main() -> int:
     args = parser.parse_args()
 
     client = SolanaRpcClient()
+    client._client.timeout = httpx.Timeout(30.0)
     try:
-        _ctx, supply = client.get_token_supply(args.mint)
-        _ctx, holders = client.get_token_largest_accounts(args.mint)
+        _ctx, supply = client.get_token_supply(mint_address=args.mint)
+        _ctx, holders = client.get_token_largest_accounts(mint=args.mint)
     finally:
         client.close()
 

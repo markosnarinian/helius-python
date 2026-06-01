@@ -7,7 +7,7 @@ involved, and any log messages emitted by the on-chain programs.
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/transaction_inspector.py <SIGNATURE>
+    python examples/solana_rpc/transaction_inspector.py <SIGNATURE>
 
 Uses (with `with`):
     get_transaction.
@@ -31,7 +31,7 @@ def main() -> int:
 
     with SolanaRpcClient() as helius:
         tx = helius.get_transaction(
-            args.signature,
+            transaction_signature=args.signature,
             encoding="jsonParsed",
             max_supported_transaction_version=0,
         )
