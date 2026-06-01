@@ -1,11 +1,12 @@
 import json
 from os import environ
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, Literal
 
 import httpx
 from dotenv import dotenv_values
 from pydantic import AliasGenerator, BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
+from typing_extensions import TypedDict
 from websockets.sync.client import connect
 
 from helius.rpc import JsonRpcRequest

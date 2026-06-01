@@ -1,3 +1,4 @@
 - Mangling __
 - WebSocket subscription manager
 - Use typeddicts where useful
+- When Python 3.10 and 3.11 go out of support we should use TypedDict from typing instead of typing_extensions

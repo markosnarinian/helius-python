@@ -1,7 +1,8 @@
-from typing import Literal, TypedDict
+from typing import Literal
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+from typing_extensions import TypedDict
 
 # TODO: Improve camelCase <-> snake_case
 
