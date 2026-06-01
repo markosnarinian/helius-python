@@ -26,7 +26,9 @@ from helius.solana_rpc.models import (
     TokenSupply,
     Transaction,
     TransactionFilters,
+    TransactionFullDetail,
     TransactionSignature,
+    TransactionSignaturesDetail,
     Transfer,
     TransferFilters,
     VotingAccount,
@@ -987,7 +989,48 @@ class SolanaRpcClient:
         response = self._send(request)
         return response["result"]
 
-    # TODO: Type response
+    @validate_call
+    def get_transactions_for_address(
+        self,
+        *,
+        address: str,
+        transaction_details: Literal["signatures", "full"] | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+        commitment: Literal["confirmed", "finalized"] | None = None,
+        min_context_slot: int | None = None,
+        limit: Annotated[int, Field(ge=1, le=1000)] | None = None,
+        pagination_token: str | None = None,
+        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
+        max_supported_transaction_version: int | None = None,
+        filters: TransactionFilters | None = None,
+    ) -> tuple[
+        list[TransactionSignaturesDetail] | list[TransactionFullDetail], str | None
+    ]:
+        request = (
+            JsonRpcRequest(method="getTransactionsForAddress")
+            .add(address)
+            .set("transactionDetails", transaction_details)
+            .set("sortOrder", sort_order)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .set("limit", limit)
+            .set("paginationToken", pagination_token)
+            .set("encoding", encoding)
+            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
+            .set("filters", filters)
+            .build()
+        )
+        response = self._send(request)
+        pagination_token = response["result"]["paginationToken"]
+        data = response["result"]["data"]
+        ta = TypeAdapter(
+            list[TransactionSignaturesDetail]
+            if transaction_details == "signatures"
+            else list[TransactionFullDetail]
+        )
+        transactions = ta.validate_python(data)
+        return transactions, pagination_token
+
     @validate_call
     def get_transfers_by_address(
         self,
@@ -1003,7 +1046,7 @@ class SolanaRpcClient:
         commitment: Literal["finalized", "confirmed"] | None = None,
         min_context_slot: int | None = None,
         sort_order: Literal["asc", "desc"] | None = None,
-    ) -> tuple[list[dict], str | None]:
+    ) -> tuple[list[Transfer], str | None]:
         request = (
             JsonRpcRequest(method="getTransfersByAddress")
             .add(address)
@@ -1017,39 +1060,6 @@ class SolanaRpcClient:
             .set("commitment", commitment)
             .set("minContextSlot", min_context_slot)
             .set("sortOrder", sort_order)
-            .build()
-        )
-        response = self._send(request)
-        result = response["result"]
-        return result["data"], result["paginationToken"]
-
-    @validate_call
-    def get_transactions_for_address(
-        self,
-        *,
-        address: str,
-        transaction_details: Literal["signatures", "full"] | None = None,
-        sort_order: Literal["asc", "desc"] | None = None,
-        commitment: Literal["confirmed", "finalized"] | None = None,
-        min_context_slot: int | None = None,
-        limit: Annotated[int, Field(ge=1, le=1000)] | None = None,
-        pagination_token: str | None = None,
-        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
-        max_supported_transaction_version: int | None = None,
-        filters: TransactionFilters | None = None,
-    ) -> tuple[list[Transfer], str | None]:
-        request = (
-            JsonRpcRequest(method="getTransactionsForAddress")
-            .add(address)
-            .set("transactionDetails", transaction_details)
-            .set("sortOrder", sort_order)
-            .set("commitment", commitment)
-            .set("minContextSlot", min_context_slot)
-            .set("limit", limit)
-            .set("paginationToken", pagination_token)
-            .set("encoding", encoding)
-            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
-            .set("filters", filters)
             .build()
         )
         response = self._send(request)

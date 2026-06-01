@@ -298,3 +298,23 @@ class Transfer(BaseModel):
     to_token_account: str
     fee_amount: str
     fee_ui_amount: str
+
+
+class TransactionSignaturesDetail(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    signature: str
+    slot: str
+    transaction_index: str
+    err: dict
+    memo: str | None
+    block_time: int | None
+    confirmation_status: int | None
+
+
+class TransactionFullDetail(BaseModel):
+    slot: int
+    transaction_index: int
+    transaction: dict
+    meta: dict | list
+    block_time: int | None
