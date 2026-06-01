@@ -889,38 +889,33 @@ class SolanaRpcClient:
         response = self._send(request)
         return response["result"]
 
-    @validate_call
-    def get_transactions_for_address(
+    def get_version(self) -> tuple[str, int]:
+        request = JsonRpcRequest(method="getVersion").build()
+        response = self._send(request)
+        result = response["result"]
+        return result["solana-core"], result["feature-set"]
+
+    def get_vote_accounts(
         self,
         *,
-        address: str,
-        transaction_details: Literal["signatures", "full"] | None = None,
-        sort_order: Literal["asc", "desc"] | None = None,
-        commitment: Literal["confirmed", "finalized"] | None = None,
-        min_context_slot: int | None = None,
-        limit: Annotated[int, Field(ge=1, le=1000)] | None = None,
-        pagination_token: str | None = None,
-        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
-        max_supported_transaction_version: int | None = None,
-        filters: TransactionFilters | None = None,
-    ) -> tuple[list[dict], str | None]:
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        vote_pubkey: str | None = None,
+        keep_unstaked_delinquents: bool | None = None,
+        delinquent_slot_distance: int | None = None,
+    ) -> tuple[list[VotingAccount], list[VotingAccount]]:
         request = (
-            JsonRpcRequest(method="getTransactionsForAddress")
-            .add(address)
-            .set("transactionDetails", transaction_details)
-            .set("sortOrder", sort_order)
+            JsonRpcRequest(method="getVoteAccounts")
             .set("commitment", commitment)
-            .set("minContextSlot", min_context_slot)
-            .set("limit", limit)
-            .set("paginationToken", pagination_token)
-            .set("encoding", encoding)
-            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
-            .set("filters", filters)
+            .set("votePubkey", vote_pubkey)
+            .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
+            .set("delinquentSlotDistance", delinquent_slot_distance)
             .build()
         )
         response = self._send(request)
-        result = response["result"]
-        return result["data"], result["paginationToken"]
+        ta = TypeAdapter(list[VotingAccount])
+        current = ta.validate_python(response["result"]["current"])
+        delinquent = ta.validate_python(response["result"]["delinquent"])
+        return current, delinquent
 
     def is_blockhash_valid(
         self,
@@ -1028,30 +1023,35 @@ class SolanaRpcClient:
         return result["data"], result["paginationToken"]
 
     # TODO: Type response
-    def get_version(self) -> tuple[str, int]:
-        request = JsonRpcRequest(method="getVersion").build()
-        response = self._send(request)
-        result = response["result"]
-        return result["solana-core"], result["feature-set"]
-
-    def get_vote_accounts(
+    @validate_call
+    def get_transactions_for_address(
         self,
         *,
-        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-        vote_pubkey: str | None = None,
-        keep_unstaked_delinquents: bool | None = None,
-        delinquent_slot_distance: int | None = None,
-    ) -> tuple[list[VotingAccount], list[VotingAccount]]:
+        address: str,
+        transaction_details: Literal["signatures", "full"] | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+        commitment: Literal["confirmed", "finalized"] | None = None,
+        min_context_slot: int | None = None,
+        limit: Annotated[int, Field(ge=1, le=1000)] | None = None,
+        pagination_token: str | None = None,
+        encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
+        max_supported_transaction_version: int | None = None,
+        filters: TransactionFilters | None = None,
+    ) -> tuple[list[dict], str | None]:
         request = (
-            JsonRpcRequest(method="getVoteAccounts")
+            JsonRpcRequest(method="getTransactionsForAddress")
+            .add(address)
+            .set("transactionDetails", transaction_details)
+            .set("sortOrder", sort_order)
             .set("commitment", commitment)
-            .set("votePubkey", vote_pubkey)
-            .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
-            .set("delinquentSlotDistance", delinquent_slot_distance)
+            .set("minContextSlot", min_context_slot)
+            .set("limit", limit)
+            .set("paginationToken", pagination_token)
+            .set("encoding", encoding)
+            .set("maxSupportedTransactionVersion", max_supported_transaction_version)
+            .set("filters", filters)
             .build()
         )
         response = self._send(request)
-        ta = TypeAdapter(list[VotingAccount])
-        current = ta.validate_python(response["result"]["current"])
-        delinquent = ta.validate_python(response["result"]["delinquent"])
-        return current, delinquent
+        result = response["result"]
+        return result["data"], result["paginationToken"]
