@@ -1,7 +1,11 @@
+from sys import stderr
+from turtle import st
 from typing import Literal, TypedDict
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
+
+# TODO: Improve camelCase <-> snake_case
 
 
 class Account(BaseModel):
@@ -238,7 +242,6 @@ class ComparisonFilter(TypedDict, total=False):
     eq: int
 
 
-# Functional syntax because "with" is a reserved keyword.
 TokenTransferFilter = TypedDict(
     "TokenTransferFilter",
     {
@@ -264,3 +267,34 @@ class TransferFilters(TypedDict, total=False):
     amount: RangeFilter
     blockTime: RangeFilter
     slot: RangeFilter
+
+
+class Transfer(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
+    signature: str
+    slot: int
+    block_time: int
+    type: Literal[
+        "transfer",
+        "mint",
+        "burn",
+        "wrap",
+        "unwrap",
+        "chnageOwner",
+        "withdrawWithheldFee",
+    ]
+    from_user_account: str | None
+    to_user_account: str | None
+    mint: str
+    amount: str
+    decimals: int
+    ui_amount: str
+    confirmation_status: Literal["finalized", "confirmed"]
+    transaction_idx: int
+    instruction_idx: int
+    inner_instruction_idx: int
+    from_token_account: str
+    to_token_account: str
+    fee_amount: str
+    fee_ui_amount: str

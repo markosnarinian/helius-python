@@ -27,6 +27,7 @@ from helius.solana_rpc.models import (
     Transaction,
     TransactionFilters,
     TransactionSignature,
+    Transfer,
     TransferFilters,
     VotingAccount,
 )
@@ -1022,7 +1023,6 @@ class SolanaRpcClient:
         result = response["result"]
         return result["data"], result["paginationToken"]
 
-    # TODO: Type response
     @validate_call
     def get_transactions_for_address(
         self,
@@ -1037,7 +1037,7 @@ class SolanaRpcClient:
         encoding: Literal["json", "jsonParsed", "base58", "base64"] | None = None,
         max_supported_transaction_version: int | None = None,
         filters: TransactionFilters | None = None,
-    ) -> tuple[list[dict], str | None]:
+    ) -> tuple[list[Transfer], str | None]:
         request = (
             JsonRpcRequest(method="getTransactionsForAddress")
             .add(address)
@@ -1053,5 +1053,8 @@ class SolanaRpcClient:
             .build()
         )
         response = self._send(request)
-        result = response["result"]
-        return result["data"], result["paginationToken"]
+        pagination_token = response["result"]["paginationToken"]
+        data = response["result"]["data"]
+        ta = TypeAdapter(list[Transfer])
+        transfers = ta.validate_python(data)
+        return transfers, pagination_token
