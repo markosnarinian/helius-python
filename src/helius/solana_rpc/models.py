@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, TypedDict
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
@@ -221,3 +221,46 @@ class Transaction(BaseModel):
     meta: TransactionMetadata | None
     transaction: dict | list
     version: Literal["legacy"] | int | None = None
+
+
+class RangeFilter(TypedDict, total=False):
+    gt: int
+    gte: int
+    lt: int
+    lte: int
+
+
+class ComparisonFilter(TypedDict, total=False):
+    gte: int
+    gt: int
+    lte: int
+    lt: int
+    eq: int
+
+
+# Functional syntax because "with" is a reserved keyword.
+TokenTransferFilter = TypedDict(
+    "TokenTransferFilter",
+    {
+        "with": str,
+        "direction": Literal["in", "out", "any"],
+        "mint": str,
+        "amount": RangeFilter,
+    },
+    total=False,
+)
+
+
+class TransactionFilters(TypedDict, total=False):
+    slot: RangeFilter
+    blockTime: ComparisonFilter
+    signature: RangeFilter
+    status: Literal["succeeded", "failed", "any"]
+    tokenAccounts: Literal["none", "balanceChanged", "all"]
+    tokenTransfer: TokenTransferFilter
+
+
+class TransferFilters(TypedDict, total=False):
+    amount: RangeFilter
+    blockTime: RangeFilter
+    slot: RangeFilter

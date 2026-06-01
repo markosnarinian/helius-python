@@ -1367,7 +1367,9 @@ def test_get_transactions_for_address():
                 "tokenTransfer": {"with": "Other", "direction": "in"},
             },
         )
-    assert data[0]["signature"].startswith("5h6x")
+    assert data[0].signature.startswith("5h6x")
+    assert data[0].transaction_index == 5
+    assert data[0].confirmation_status == "finalized"
     assert pagination_token == "1055:5"
     assert body(route)["method"] == "getTransactionsForAddress"
     assert body(route)["params"] == [
@@ -1451,8 +1453,10 @@ def test_get_transfers_by_address():
             pagination_token="315069220:308:2:1:splTransfer",
             sort_order="desc",
         )
-    assert data[0]["signature"].startswith("5GEX")
-    assert data[0]["mint"] == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    assert data[0].signature.startswith("5GEX")
+    assert data[0].mint == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    assert data[0].ui_amount == "2.5"
+    assert data[0].inner_instruction_idx == 0
     assert pagination_token == "315073428:35:1:0:splTransfer"
     assert body(route)["method"] == "getTransfersByAddress"
     assert body(route)["params"] == [

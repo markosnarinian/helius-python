@@ -1,5 +1,5 @@
 from os import environ
-from typing import Annotated, Literal, TypedDict
+from typing import Annotated, Literal
 
 import httpx
 from dotenv import dotenv_values
@@ -25,52 +25,11 @@ from helius.solana_rpc.models import (
     TokenAccountBalance,
     TokenSupply,
     Transaction,
+    TransactionFilters,
     TransactionSignature,
+    TransferFilters,
     VotingAccount,
 )
-
-
-class RangeFilter(TypedDict, total=False):
-    gt: int
-    gte: int
-    lt: int
-    lte: int
-
-
-class ComparisonFilter(TypedDict, total=False):
-    gte: int
-    gt: int
-    lte: int
-    lt: int
-    eq: int
-
-
-# Functional syntax because "with" is a reserved keyword.
-TokenTransferFilter = TypedDict(
-    "TokenTransferFilter",
-    {
-        "with": str,
-        "direction": Literal["in", "out", "any"],
-        "mint": str,
-        "amount": RangeFilter,
-    },
-    total=False,
-)
-
-
-class TransactionFilters(TypedDict, total=False):
-    slot: RangeFilter
-    blockTime: ComparisonFilter
-    signature: RangeFilter
-    status: Literal["succeeded", "failed", "any"]
-    tokenAccounts: Literal["none", "balanceChanged", "all"]
-    tokenTransfer: TokenTransferFilter
-
-
-class TransferFilters(TypedDict, total=False):
-    amount: RangeFilter
-    blockTime: RangeFilter
-    slot: RangeFilter
 
 
 # TODO: Use Pydantic typed dict where useful
@@ -963,69 +922,6 @@ class SolanaRpcClient:
         result = response["result"]
         return result["data"], result["paginationToken"]
 
-    @validate_call
-    def get_transfers_by_address(
-        self,
-        *,
-        address: str,
-        with_address: str | None = None,
-        direction: Literal["in", "out", "any"] | None = None,
-        mint: str | None = None,
-        sol_mode: Literal["merged", "separate"] | None = None,
-        filters: TransferFilters | None = None,
-        limit: Annotated[int, Field(ge=1, le=100)] | None = None,
-        pagination_token: str | None = None,
-        commitment: Literal["finalized", "confirmed"] | None = None,
-        min_context_slot: int | None = None,
-        sort_order: Literal["asc", "desc"] | None = None,
-    ) -> tuple[list[dict], str | None]:
-        request = (
-            JsonRpcRequest(method="getTransfersByAddress")
-            .add(address)
-            .set("with", with_address)
-            .set("direction", direction)
-            .set("mint", mint)
-            .set("solMode", sol_mode)
-            .set("filters", filters)
-            .set("limit", limit)
-            .set("paginationToken", pagination_token)
-            .set("commitment", commitment)
-            .set("minContextSlot", min_context_slot)
-            .set("sortOrder", sort_order)
-            .build()
-        )
-        response = self._send(request)
-        result = response["result"]
-        return result["data"], result["paginationToken"]
-
-    def get_version(self) -> tuple[str, int]:
-        request = JsonRpcRequest(method="getVersion").build()
-        response = self._send(request)
-        result = response["result"]
-        return result["solana-core"], result["feature-set"]
-
-    def get_vote_accounts(
-        self,
-        *,
-        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-        vote_pubkey: str | None = None,
-        keep_unstaked_delinquents: bool | None = None,
-        delinquent_slot_distance: int | None = None,
-    ) -> tuple[list[VotingAccount], list[VotingAccount]]:
-        request = (
-            JsonRpcRequest(method="getVoteAccounts")
-            .set("commitment", commitment)
-            .set("votePubkey", vote_pubkey)
-            .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
-            .set("delinquentSlotDistance", delinquent_slot_distance)
-            .build()
-        )
-        response = self._send(request)
-        ta = TypeAdapter(list[VotingAccount])
-        current = ta.validate_python(response["result"]["current"])
-        delinquent = ta.validate_python(response["result"]["delinquent"])
-        return current, delinquent
-
     def is_blockhash_valid(
         self,
         *,
@@ -1094,3 +990,68 @@ class SolanaRpcClient:
         )
         response = self._send(request)
         return response["result"]
+
+    # TODO: Type response
+    @validate_call
+    def get_transfers_by_address(
+        self,
+        *,
+        address: str,
+        with_address: str | None = None,
+        direction: Literal["in", "out", "any"] | None = None,
+        mint: str | None = None,
+        sol_mode: Literal["merged", "separate"] | None = None,
+        filters: TransferFilters | None = None,
+        limit: Annotated[int, Field(ge=1, le=100)] | None = None,
+        pagination_token: str | None = None,
+        commitment: Literal["finalized", "confirmed"] | None = None,
+        min_context_slot: int | None = None,
+        sort_order: Literal["asc", "desc"] | None = None,
+    ) -> tuple[list[dict], str | None]:
+        request = (
+            JsonRpcRequest(method="getTransfersByAddress")
+            .add(address)
+            .set("with", with_address)
+            .set("direction", direction)
+            .set("mint", mint)
+            .set("solMode", sol_mode)
+            .set("filters", filters)
+            .set("limit", limit)
+            .set("paginationToken", pagination_token)
+            .set("commitment", commitment)
+            .set("minContextSlot", min_context_slot)
+            .set("sortOrder", sort_order)
+            .build()
+        )
+        response = self._send(request)
+        result = response["result"]
+        return result["data"], result["paginationToken"]
+
+    # TODO: Type response
+    def get_version(self) -> tuple[str, int]:
+        request = JsonRpcRequest(method="getVersion").build()
+        response = self._send(request)
+        result = response["result"]
+        return result["solana-core"], result["feature-set"]
+
+    def get_vote_accounts(
+        self,
+        *,
+        commitment: Literal["finalized", "confirmed", "processed"] | None = None,
+        vote_pubkey: str | None = None,
+        keep_unstaked_delinquents: bool | None = None,
+        delinquent_slot_distance: int | None = None,
+    ) -> tuple[list[VotingAccount], list[VotingAccount]]:
+        request = (
+            JsonRpcRequest(method="getVoteAccounts")
+            .set("commitment", commitment)
+            .set("votePubkey", vote_pubkey)
+            .set("keepUnstakedDelinquents", keep_unstaked_delinquents)
+            .set("delinquentSlotDistance", delinquent_slot_distance)
+            .build()
+        )
+        response = self._send(request)
+        ta = TypeAdapter(list[VotingAccount])
+        current = ta.validate_python(response["result"]["current"])
+        delinquent = ta.validate_python(response["result"]["delinquent"])
+        return current, delinquent
