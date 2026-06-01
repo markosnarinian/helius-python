@@ -1,5 +1,3 @@
-from sys import stderr
-from turtle import st
 from typing import Literal, TypedDict
 
 from pydantic import AliasGenerator, BaseModel, ConfigDict
@@ -281,7 +279,7 @@ class Transfer(BaseModel):
         "burn",
         "wrap",
         "unwrap",
-        "chnageOwner",
+        "changeOwner",
         "withdrawWithheldFee",
     ]
     from_user_account: str | None
@@ -294,25 +292,27 @@ class Transfer(BaseModel):
     transaction_idx: int
     instruction_idx: int
     inner_instruction_idx: int
-    from_token_account: str
-    to_token_account: str
-    fee_amount: str
-    fee_ui_amount: str
+    from_token_account: str | None = None
+    to_token_account: str | None = None
+    fee_amount: str | None = None
+    fee_ui_amount: str | None = None
 
 
 class TransactionSignaturesDetail(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
     signature: str
-    slot: str
-    transaction_index: str
-    err: dict
+    slot: int
+    transaction_index: int
+    err: dict | None
     memo: str | None
     block_time: int | None
-    confirmation_status: int | None
+    confirmation_status: Literal["finalized", "confirmed"] | None
 
 
 class TransactionFullDetail(BaseModel):
+    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
+
     slot: int
     transaction_index: int
     transaction: dict

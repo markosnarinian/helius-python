@@ -1339,18 +1339,101 @@ def test_get_transaction_count():
 
 
 @respx.mock
-def test_get_transactions_for_address():
+def test_get_transactions_for_address_signatures():
     route = mock_rpc(
         {
             "data": [
                 {
-                    "signature": "5h6xBEauJ3PK6SWCZ1PGCzN3gAPdAHWyRqQqdDMNLdSQQRuHFpktzq1nzCvL7pxDqRan",
-                    "slot": 1055,
-                    "transactionIndex": 5,
+                    "signature": "5h6xBEauJ3PK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv",
+                    "slot": 1054,
+                    "transactionIndex": 42,
                     "err": None,
                     "memo": None,
-                    "blockTime": 1633036800,
+                    "blockTime": 1641038400,
                     "confirmationStatus": "finalized",
+                },
+                {
+                    "signature": "kwjd820slPK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv",
+                    "slot": 1055,
+                    "transactionIndex": 15,
+                    "err": None,
+                    "memo": None,
+                    "blockTime": 1641038460,
+                    "confirmationStatus": "finalized",
+                },
+            ],
+            "paginationToken": "1055:5",
+        }
+    )
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transactions_for_address(
+            address="Vote111111111111111111111111111111111111111",
+            transaction_details="signatures",
+            sort_order="desc",
+            limit=50,
+            filters={
+                "status": "succeeded",
+                "slot": {"gte": 1000, "lt": 2000},
+                "tokenTransfer": {
+                    "direction": "in",
+                    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                },
+            },
+        )
+    assert len(data) == 2
+    assert data[0].signature.startswith("5h6x")
+    assert data[0].slot == 1054
+    assert data[0].transaction_index == 42
+    assert data[0].err is None
+    assert data[0].memo is None
+    assert data[0].block_time == 1641038400
+    assert data[0].confirmation_status == "finalized"
+    assert data[1].slot == 1055
+    assert data[1].transaction_index == 15
+    assert pagination_token == "1055:5"
+    assert body(route)["method"] == "getTransactionsForAddress"
+    assert body(route)["params"] == [
+        "Vote111111111111111111111111111111111111111",
+        {
+            "transactionDetails": "signatures",
+            "sortOrder": "desc",
+            "limit": 50,
+            "filters": {
+                "status": "succeeded",
+                "slot": {"gte": 1000, "lt": 2000},
+                "tokenTransfer": {
+                    "direction": "in",
+                    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                },
+            },
+        },
+    ]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transactions_for_address_full():
+    route = mock_rpc(
+        {
+            "data": [
+                {
+                    "slot": 1054,
+                    "transactionIndex": 42,
+                    "transaction": {
+                        "signatures": [
+                            "5h6xBEauJ3PK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv"
+                        ],
+                        "message": {
+                            "accountKeys": ["AccountA", "AccountB"],
+                            "instructions": [],
+                        },
+                    },
+                    "meta": {
+                        "fee": 5000,
+                        "preBalances": [1000000, 2000000],
+                        "postBalances": [999995000, 2000000],
+                    },
+                    "blockTime": 1641038400,
                 }
             ],
             "paginationToken": "1055:5",
@@ -1358,30 +1441,25 @@ def test_get_transactions_for_address():
     )
     with SolanaRpcClient(api_key="test") as client:
         data, pagination_token = client.get_transactions_for_address(
-            address="Addr",
-            transaction_details="signatures",
-            sort_order="desc",
-            limit=1,
-            filters={
-                "status": "succeeded",
-                "tokenTransfer": {"with": "Other", "direction": "in"},
-            },
+            address="Vote111111111111111111111111111111111111111",
+            transaction_details="full",
+            encoding="jsonParsed",
+            max_supported_transaction_version=0,
         )
-    assert data[0].signature.startswith("5h6x")
-    assert data[0].transaction_index == 5
-    assert data[0].confirmation_status == "finalized"
+    assert len(data) == 1
+    assert data[0].slot == 1054
+    assert data[0].transaction_index == 42
+    assert data[0].block_time == 1641038400
+    assert data[0].meta["fee"] == 5000
+    assert data[0].transaction["message"]["accountKeys"] == ["AccountA", "AccountB"]
     assert pagination_token == "1055:5"
     assert body(route)["method"] == "getTransactionsForAddress"
     assert body(route)["params"] == [
-        "Addr",
+        "Vote111111111111111111111111111111111111111",
         {
-            "transactionDetails": "signatures",
-            "sortOrder": "desc",
-            "limit": 1,
-            "filters": {
-                "status": "succeeded",
-                "tokenTransfer": {"with": "Other", "direction": "in"},
-            },
+            "transactionDetails": "full",
+            "encoding": "jsonParsed",
+            "maxSupportedTransactionVersion": 0,
         },
     ]
     assert_api_key(route)
@@ -1417,7 +1495,7 @@ def test_get_transfers_by_address():
         {
             "data": [
                 {
-                    "signature": "5GEX7Q3X5Q8yJGbKYoR7mtzQmG8tpoEwzjPgqVmn3y5xg3y",
+                    "signature": "5GEX7Q3X5Q8yJGbKYoR7mtzQmG8tpoEwzjPgqVmn3y5xg3yKwqXcDdN5YVcc9V6vA4TuH5iM6FHRVhTxvz4AX2zG",
                     "slot": 315073428,
                     "blockTime": 1736159420,
                     "type": "transfer",
@@ -1453,10 +1531,26 @@ def test_get_transfers_by_address():
             pagination_token="315069220:308:2:1:splTransfer",
             sort_order="desc",
         )
-    assert data[0].signature.startswith("5GEX")
-    assert data[0].mint == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
-    assert data[0].ui_amount == "2.5"
-    assert data[0].inner_instruction_idx == 0
+    assert len(data) == 1
+    transfer = data[0]
+    assert transfer.signature.startswith("5GEX")
+    assert transfer.slot == 315073428
+    assert transfer.block_time == 1736159420
+    assert transfer.type == "transfer"
+    assert transfer.from_user_account == "7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx"
+    assert transfer.to_user_account == "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY"
+    assert transfer.from_token_account == "HcvK3EJ74iM9g11cUgsaPvLSrhCvCwcrWxBNd87LsC1x"
+    assert transfer.to_token_account == "CBcYniR9G9CN3zGMnwNE4SWbqkYWvCFVreEob9xHnQCY"
+    assert transfer.mint == "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+    assert transfer.amount == "2500000"
+    assert transfer.decimals == 6
+    assert transfer.ui_amount == "2.5"
+    assert transfer.confirmation_status == "finalized"
+    assert transfer.transaction_idx == 35
+    assert transfer.instruction_idx == 1
+    assert transfer.inner_instruction_idx == 0
+    assert transfer.fee_amount is None
+    assert transfer.fee_ui_amount is None
     assert pagination_token == "315073428:35:1:0:splTransfer"
     assert body(route)["method"] == "getTransfersByAddress"
     assert body(route)["params"] == [
@@ -1475,6 +1569,81 @@ def test_get_transfers_by_address():
             "sortOrder": "desc",
         },
     ]
+    assert_api_key(route)
+
+
+@respx.mock
+def test_get_transfers_by_address_native_sol_transfer():
+    """Native SOL transfers omit token-account fields."""
+    route = mock_rpc(
+        {
+            "data": [
+                {
+                    "signature": "5GEX7Q3X5Q8yJGbKYoR7mtzQmG8tpoEwzjPgqVmn3y5xg3yKwqXcDdN5YVcc9V6vA4TuH5iM6FHRVhTxvz4AX2zG",
+                    "slot": 315073428,
+                    "blockTime": 1736159420,
+                    "type": "transfer",
+                    "fromUserAccount": "7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx",
+                    "toUserAccount": "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+                    "mint": "So11111111111111111111111111111111111111111",
+                    "amount": "1000000000",
+                    "decimals": 9,
+                    "uiAmount": "1",
+                    "confirmationStatus": "finalized",
+                    "transactionIdx": 0,
+                    "instructionIdx": 0,
+                    "innerInstructionIdx": 0,
+                }
+            ],
+            "paginationToken": None,
+        }
+    )
+    with SolanaRpcClient(api_key="test") as client:
+        data, pagination_token = client.get_transfers_by_address(
+            address="86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+            sol_mode="merged",
+        )
+    assert pagination_token is None
+    assert data[0].from_token_account is None
+    assert data[0].to_token_account is None
+    assert data[0].mint == "So11111111111111111111111111111111111111111"
+    assert body(route)["params"][1] == {"solMode": "merged"}
+
+
+@respx.mock
+def test_get_transfers_by_address_fee_bearing_transfer():
+    """Token-2022 fee-bearing transfers include feeAmount and feeUiAmount."""
+    route = mock_rpc(
+        {
+            "data": [
+                {
+                    "signature": "5GEX7Q3X5Q8yJGbKYoR7mtzQmG8tpoEwzjPgqVmn3y5xg3yKwqXcDdN5YVcc9V6vA4TuH5iM6FHRVhTxvz4AX2zG",
+                    "slot": 315073428,
+                    "blockTime": 1736159420,
+                    "type": "transfer",
+                    "fromUserAccount": "7hPhaUpydpvm8wtiS3k4LPZKUmivQRs7YQmpE1hFshHx",
+                    "toUserAccount": "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY",
+                    "fromTokenAccount": "HcvK3EJ74iM9g11cUgsaPvLSrhCvCwcrWxBNd87LsC1x",
+                    "toTokenAccount": "CBcYniR9G9CN3zGMnwNE4SWbqkYWvCFVreEob9xHnQCY",
+                    "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+                    "amount": "2500000",
+                    "feeAmount": "13450000",
+                    "decimals": 6,
+                    "uiAmount": "2.5",
+                    "feeUiAmount": "13.45",
+                    "confirmationStatus": "finalized",
+                    "transactionIdx": 35,
+                    "instructionIdx": 1,
+                    "innerInstructionIdx": 0,
+                }
+            ],
+            "paginationToken": None,
+        }
+    )
+    with SolanaRpcClient(api_key="test") as client:
+        data, _ = client.get_transfers_by_address(address="Addr")
+    assert data[0].fee_amount == "13450000"
+    assert data[0].fee_ui_amount == "13.45"
     assert_api_key(route)
 
 
