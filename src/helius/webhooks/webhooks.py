@@ -680,3 +680,28 @@ class WebhooksApiClient:
     def get_all_webhooks(self) -> list[Webhook]:
         response = self._get("/")
         return [Webhook.model_validate(webhook) for webhook in response]
+
+    def update_webhook(
+        self,
+        webhook_id: str,
+        *,
+        webhook_url: str,
+        transaction_types: list[TransactionType],
+        account_addresses: list[str],
+        webhook_type: WebhookType,
+        auth_header: str,
+        encoding: str,
+        txn_status: str,
+    ) -> Webhook:
+        request = {
+            "webhookURL": webhook_url,
+            "transactionTypes": transaction_types,
+            "accountAddresses": account_addresses,
+            "webhookType": webhook_type,
+            "authHeader": auth_header,
+            "encoding": encoding,
+            "txnStatus": txn_status,
+        }
+        response = self._send(f"/{webhook_id}", "PUT", request)
+        webhook = Webhook.model_validate(response)
+        return webhook
