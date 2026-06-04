@@ -410,11 +410,15 @@ supports the context-manager protocol, a manual `close()`, and reads
 `HELIUS_API_KEY` from the environment or `.env`.
 
 ## AI
-AI was used to assist in the development of this project, started beacause I needed a Helius client written in Python myself. It has been very helpful in eliminating the need to perform repetitive tasks, such as writing functions that are similar to those written by hand before them. It has also been useful in drafting and updating the documentation (exclusively README.md, at the time of writing), writing tests and examples.
+AI was used to assist in the development of this project, which was started beacause I needed a Helius client written in Python myself for another project. It has eliminated the need to perform repetitive tasks, such as writing functions that are similar to those written by hand before them. It has also been useful in drafting and updating the documentation (exclusively README.md at the time of writing), writing tests and examples.
 That said, AI-generated code is reviewed in full, line-by-line by human(s) against the Helius API specifications.
 
 To roughly describe my approach to using AI in this project, I generally write the code by hand, which makes it easy to structure the code well and maintain an intuitive understanding of how the code works. Then, when I got to the part where I had to implement 100+ similar Python functions, I turned to AI to write the massive part of the codebase, while I reviewed the result at the same time.
-It's safe to say that more than half the LoC in this project, excluding tests and examples, are written by hand, though I find AI really useful and helpful and believe it allows me to focus my time and energy in the simple, uninteresting, repetitive parts.
+
+To sum up:
+- I generally structure** and write a good part of what I'm programming by hand, including boilerplate.
+- I find it best to prompt agents to implement very limited functionality within narrow scope, performing something closer to pair-programming.
+- Even though at least half the LoC in this project are hand-typed, I find that AI is incredibly capable, can be enjoyable to use, but most importantly, using AI allows me to focus my time and energy on what matters which also where I'm necessary.
 
 By the way, this README is section is completely brain-made and hand-typed.
 
