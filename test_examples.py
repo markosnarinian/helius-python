@@ -121,6 +121,16 @@ TESTS = [
         timeout=45,
         external_failure_markers=("TimeoutError: timed out", "403 Forbidden", "HTTP 403"),
     ),
+    ExampleTest(
+        name="webhooks/webhook_crud",
+        args=[
+            "examples/webhooks/webhook_crud.py",
+            "create",
+            "https://example.com/helius/webhook",
+            SYSTEM_PROGRAM,
+            "--dry-run",
+        ],
+    ),
 ]
 
 
