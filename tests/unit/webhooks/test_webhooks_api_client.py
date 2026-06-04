@@ -1,6 +1,7 @@
+import json
+
 import httpx
 import respx
-import json
 
 from helius.webhooks.webhooks import WebhooksApiClient
 
@@ -11,7 +12,7 @@ WEBHOOK_RESPONSE = {
     "webhookURL": "https://example.com/webhook",
     "transactionTypes": ["TRANSFER"],
     "accountAddresses": ["account-address"],
-    "webhookType": ["enhanced"],
+    "webhookType": "enhanced",
     "authHeader": "Bearer secret",
     "active": True,
 }
