@@ -671,3 +671,8 @@ class WebhooksApiClient:
         response = self._send("/", "POST", request)
         webhook = Webhook.model_validate(response)
         return webhook
+
+    def get_webhook(self, webhook_id: str) -> Webhook:
+        response = self._get(f"/{webhook_id}")
+        webhook = Webhook.model_validate(response)
+        return webhook
