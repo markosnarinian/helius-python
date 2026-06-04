@@ -418,7 +418,7 @@ To roughly describe my approach to using AI in this project, I generally write t
 To sum up:
 - I generally structure** and write a good part of what I'm programming by hand, including boilerplate.
 - I find it best to prompt agents to implement very limited functionality within narrow scope, performing something closer to pair-programming.
-- Even though at least half the LoC in this project are hand-typed, I find that AI is incredibly capable, can be enjoyable to use, but most importantly, using AI allows me to focus my time and energy on what matters which also where I'm necessary.
+- Even though at least half the LoC in this project are hand-typed, I find that AI is incredibly capable, can be enjoyable to use, but most importantly, using AI allows me to focus my time and energy on what matters.
 
 By the way, this README section is completely brain-made and hand-typed.
 
