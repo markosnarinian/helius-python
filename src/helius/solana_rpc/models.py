@@ -4,8 +4,6 @@ from pydantic import AliasGenerator, BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel
 from typing_extensions import TypedDict
 
-# TODO: Improve camelCase <-> snake_case
-
 
 class Account(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
