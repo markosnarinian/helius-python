@@ -416,7 +416,7 @@ That said, AI-generated code is reviewed in full, line-by-line by human(s) again
 To roughly describe my approach to using AI in this project, I generally write the code by hand, which makes it easy to structure the code well and maintain an intuitive understanding of how the code works. Then, when I got to the part where I had to implement 100+ similar Python functions, I turned to AI to write the massive part of the codebase, while I reviewed the result at the same time.
 
 To sum up:
-- I generally structure** and write a good part of what I'm programming by hand, including boilerplate.
+- I generally structure and write a good part of what I'm programming by hand, including boilerplate.
 - I find it best to prompt agents to implement very limited functionality within narrow scope, performing something closer to pair-programming.
 - Even though at least half the LoC in this project are hand-typed, I find that AI is incredibly capable, can be enjoyable to use, but most importantly, using AI allows me to focus my time and energy on what matters.
 
