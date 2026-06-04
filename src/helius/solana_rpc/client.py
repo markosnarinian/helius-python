@@ -5,7 +5,6 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import Field, TypeAdapter, validate_call
 
-from helius.rpc import JsonRpcRequest
 from helius.solana_rpc.models import (
     Account,
     Block,
@@ -33,6 +32,7 @@ from helius.solana_rpc.models import (
     TransferFilters,
     VotingAccount,
 )
+from helius.utils import JsonRpcRequest
 
 
 # TODO: Use Pydantic typed dict where useful

@@ -9,7 +9,7 @@ from pydantic.alias_generators import to_camel
 from typing_extensions import TypedDict
 from websockets.sync.client import connect
 
-from helius.rpc import JsonRpcRequest
+from helius.utils import JsonRpcRequest
 
 
 class Notification(BaseModel):

@@ -1,4 +1,4 @@
-from helius.rpc import JsonRpcRequest
+from helius.utils import JsonRpcRequest
 
 
 def test_add_skips_none_unless_allowed():
