@@ -2,3 +2,5 @@
 - WebSocket subscription manager
 - Use typeddicts where useful
 - When Python 3.10 and 3.11 go out of support we should use TypedDict from typing instead of typing_extensions
+- Improve camelCase <-> snake_case in typing
+- Handle HTTP response codes and idiomatic error messages in responses
