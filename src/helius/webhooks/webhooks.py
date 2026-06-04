@@ -638,8 +638,14 @@ class WebhooksApiClient:
     def close(self) -> None:
         self._client.close()
 
-    def _send(self, url: str, method: str, json: dict) -> dict:
-        response = self._client.request(method=method, url=url, json=json)
+    def _send(self, url: str, method: str, json: dict | None = None) -> dict:
+        kwargs: dict = {
+            "method": method,
+            "url": url,
+        }
+        if json is not None:
+            kwargs.update({"json": json})
+        response = self._client.request(**kwargs)
         response.raise_for_status()
         return response.json()
 
@@ -710,3 +716,7 @@ class WebhooksApiClient:
         response = self._send(f"/{webhook_id}", "PATCH", {"active": active})
         webhook = Webhook.model_validate(response)
         return webhook
+
+    def delete_webhook(self, webhook_id: str) -> dict:
+        response = self._send(f"/{webhook_id}", method="DELETE")
+        return response["message"]
