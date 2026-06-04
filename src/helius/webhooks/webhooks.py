@@ -705,3 +705,8 @@ class WebhooksApiClient:
         response = self._send(f"/{webhook_id}", "PUT", request)
         webhook = Webhook.model_validate(response)
         return webhook
+
+    def toggle_webhook(self, webhook_id: str, *, active: bool) -> Webhook:
+        response = self._send(f"/{webhook_id}", "PATCH", {"active": active})
+        webhook = Webhook.model_validate(response)
+        return webhook
