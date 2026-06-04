@@ -113,9 +113,10 @@ wraps it.
 - 🚧 **All Helius-specific RPC extensions** — enhanced transactions, DAS
   (Digital Asset Standard) methods, priority fee estimation, and the
   rest of the Helius-only RPC namespace. **(in progress)**
-- 🚧 **Every Helius REST endpoint** — Enhanced Transactions API,
-  Webhooks API, Mint API, token metadata, address lookups, and beyond.
-  **(in progress)**
+- ✅ **Webhooks API** — create, fetch, update, enable/disable, and delete
+  Helius webhooks. **(supported today)**
+- 🚧 **Remaining Helius REST endpoints** — Enhanced Transactions API,
+  Mint API, token metadata, address lookups, and beyond. **(in progress)**
 - 🚧 **Platform features** — streaming, websockets, and any new
   capability Helius adds to its API. The full WebSocket subscription
   surface (`accountSubscribe`, `transactionSubscribe`, `logsSubscribe`,
@@ -123,10 +124,10 @@ wraps it.
   platform features are **in progress**.
 
 **Current status:** the standard Solana JSON-RPC surface, the
-WebSocket subscription surface, and the Admin (account management)
-usage endpoint are implemented today. Support for Helius RPC
-extensions and the remaining REST endpoints is actively being worked
-on.
+WebSocket subscription surface, the Webhooks API, and the Admin
+(account management) usage endpoint are implemented today. Support for
+Helius RPC extensions and the remaining REST endpoints is actively
+being worked on.
 
 ## Goals
 
@@ -244,9 +245,9 @@ The method names map 1:1 to the Solana JSON-RPC spec, just converted to
 ## Status
 
 Actively expanding toward full coverage of the Helius API. See
-[`src/helius/solana_rpc.py`](src/helius/solana_rpc.py) for the current list of
-implemented methods; missing endpoints are tracked as issues and added
-continuously.
+[`src/helius/solana_rpc/client.py`](src/helius/solana_rpc/client.py) for the
+current Solana JSON-RPC implementation; supported surfaces are listed below,
+and missing endpoints are tracked as issues and added continuously.
 
 | Solana JSON-RPC method              | Python method                                 | Helius docs                                                                                                                                                                          |
 | ----------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -349,6 +350,44 @@ them; both yield a `(context, notification, subscription)` tuple where
 | `slots_updates_subscribe()`     | `slots_updates_unsubscribe(...)`  | `SlotsUpdatesNotification`    | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsupdatessubscribe)                                                        |
 | `vote_subscribe()`              | `vote_unsubscribe(...)`           | `VoteNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/votesubscribe)                                                                |
 | `transaction_subscribe(...)`    | `transaction_unsubscribe(...)`    | `TransactionNotification`     | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotunsubscribe)                                                                                       |
+
+## Webhooks API
+
+`WebhooksApiClient` wraps the Helius Webhooks REST API. It can create,
+fetch, list, update, enable/disable, and delete webhook subscriptions,
+returning typed `Webhook` models where the endpoint returns a webhook.
+
+```python
+from helius.webhooks.webhooks import WebhooksApiClient
+
+with WebhooksApiClient(api_key="YOUR_HELIUS_API_KEY") as webhooks:
+    webhook = webhooks.create_webhook(
+        webhook_url="https://example.com/helius-webhook",
+        transaction_types=["TRANSFER"],
+        account_addresses=["So11111111111111111111111111111111111111112"],
+        webhook_type="enhanced",
+        auth_header="Bearer your-shared-secret",
+        encoding="jsonParsed",
+        txn_status="all",
+    )
+
+    webhooks.toggle_webhook(webhook.webhook_id, active=False)
+```
+
+Like the other clients, it supports the context-manager protocol and a
+manual `close()`. The constructor defaults to
+`https://mainnet.helius-rpc.com/v0/webhooks` and reads `HELIUS_API_KEY`
+from the environment or `.env` when `api_key` is omitted; optional
+`headers` and `proxy` arguments are also accepted.
+
+| REST operation | Python method              | Helius docs                                                                                       |
+| -------------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
+| Create webhook | `create_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/create-webhook)                    |
+| Get webhook    | `get_webhook(...)`         | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-webhook)                       |
+| List webhooks  | `get_all_webhooks()`       | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-all-webhooks)                  |
+| Update webhook | `update_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/update-webhook)                    |
+| Toggle webhook | `toggle_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/toggle-webhook)                    |
+| Delete webhook | `delete_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/delete-webhook)                    |
 
 ## Admin API
 
