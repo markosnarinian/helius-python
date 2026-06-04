@@ -11,30 +11,32 @@ class BillingCycle(BaseModel):
     end: str
 
 
-class SubscriptionDetails(BaseModel):
-    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
-
-    billing_cycle: BillingCycle
-    credits_limit: float
-    plan: str
-
-
-class Usage(BaseModel):
-    model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
-
-    api: int
-    archival: int
-    das: int
-    grpc: int
-    grpc_geyser: int
-    photon: int
-    rpc: int
-    stream: int
-    webhook: int
-    websocket: int
-
-
 class ProjectUsage(BaseModel):
+    class SubscriptionDetails(BaseModel):
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel)
+        )
+
+        billing_cycle: BillingCycle
+        credits_limit: float
+        plan: str
+
+    class Usage(BaseModel):
+        model_config = ConfigDict(
+            alias_generator=AliasGenerator(validation_alias=to_camel)
+        )
+
+        api: int
+        archival: int
+        das: int
+        grpc: int
+        grpc_geyser: int
+        photon: int
+        rpc: int
+        stream: int
+        webhook: int
+        websocket: int
+
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
     credits_remaining: float
