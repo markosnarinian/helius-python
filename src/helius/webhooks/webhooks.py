@@ -599,7 +599,7 @@ class Webhook(BaseModel):
     webhook_url: str = Field(validation_alias=AliasChoices("webhookURL", "webhookUrl"))
     transaction_types: list[TransactionType]
     account_addresses: list[str]
-    webhook_type: list[WebhookType]
+    webhook_type: WebhookType
     auth_header: str
     active: bool
 
