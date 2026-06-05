@@ -101,7 +101,7 @@
 
 ## Coverage
 
-The goal of this library is **support every function, method, endpoint,
+The goal of this library is to **support every function, method, endpoint,
 and feature that Helius exposes.** If Helius ships it, this client
 wraps it.
 
@@ -139,6 +139,7 @@ being worked on.
    documented Helius API.
 
 ## Installation via PyPI
+
 ```bash
 pip install helius-python
 ```
@@ -338,18 +339,18 @@ Each `*_subscribe` call returns the integer subscription id. Use
 them; both yield a `(context, notification, subscription)` tuple where
 `notification` is the model below.
 
-| Subscribe method                | Unsubscribe method                | Notification model            | Helius docs                                                                                                                                       |
-| ------------------------------- | --------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `account_subscribe(...)`        | `account_unsubscribe(...)`        | `AccountNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/accountsubscribe)                                                             |
-| `block_subscribe(...)`          | `block_unsubscribe(...)`          | `BlockNotification`           | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/blocksubscribe)                                                               |
-| `logs_subscribe(...)`           | `logs_unsubscribe(...)`           | `LogsNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/logssubscribe)                                                                |
-| `program_subscribe(...)`        | `program_unsubscribe(...)`        | `ProgramNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/programsubscribe)                                                             |
-| `root_subscribe()`              | `root_unsubscribe(...)`           | `RootNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/rootsubscribe)                                                                |
-| `signature_subscribe(...)`      | `signature_unsubscribe(...)`      | `SignatureNotification`       | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/signaturesubscribe)                                                           |
-| `slot_subscribe()`              | `slot_unsubscribe(...)`           | `SlotNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsubscribe)                                                                |
-| `slots_updates_subscribe()`     | `slots_updates_unsubscribe(...)`  | `SlotsUpdatesNotification`    | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsupdatessubscribe)                                                        |
-| `vote_subscribe()`              | `vote_unsubscribe(...)`           | `VoteNotification`            | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/votesubscribe)                                                                |
-| `transaction_subscribe(...)`    | `transaction_unsubscribe(...)`    | `TransactionNotification`     | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotunsubscribe)                                                                                       |
+| Subscribe method             | Unsubscribe method               | Notification model         | Helius docs                                                                                |
+| ---------------------------- | -------------------------------- | -------------------------- | ------------------------------------------------------------------------------------------ |
+| `account_subscribe(...)`     | `account_unsubscribe(...)`       | `AccountNotification`      | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/accountsubscribe)      |
+| `block_subscribe(...)`       | `block_unsubscribe(...)`         | `BlockNotification`        | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/blocksubscribe)        |
+| `logs_subscribe(...)`        | `logs_unsubscribe(...)`          | `LogsNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/logssubscribe)         |
+| `program_subscribe(...)`     | `program_unsubscribe(...)`       | `ProgramNotification`      | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/programsubscribe)      |
+| `root_subscribe()`           | `root_unsubscribe(...)`          | `RootNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/rootsubscribe)         |
+| `signature_subscribe(...)`   | `signature_unsubscribe(...)`     | `SignatureNotification`    | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/signaturesubscribe)    |
+| `slot_subscribe()`           | `slot_unsubscribe(...)`          | `SlotNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsubscribe)         |
+| `slots_updates_subscribe()`  | `slots_updates_unsubscribe(...)` | `SlotsUpdatesNotification` | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/slotsupdatessubscribe) |
+| `vote_subscribe()`           | `vote_unsubscribe(...)`          | `VoteNotification`         | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/votesubscribe)         |
+| `transaction_subscribe(...)` | `transaction_unsubscribe(...)`   | `TransactionNotification`  | [reference](https://www.helius.dev/docs/api-reference/rpc/websocket/transactionsubscribe)  |
 
 ## Webhooks API
 
@@ -380,14 +381,14 @@ manual `close()`. The constructor defaults to
 from the environment or `.env` when `api_key` is omitted; optional
 `headers` and `proxy` arguments are also accepted.
 
-| REST operation | Python method              | Helius docs                                                                                       |
-| -------------- | -------------------------- | ------------------------------------------------------------------------------------------------- |
-| Create webhook | `create_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/create-webhook)                    |
-| Get webhook    | `get_webhook(...)`         | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-webhook)                       |
-| List webhooks  | `get_all_webhooks()`       | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-all-webhooks)                  |
-| Update webhook | `update_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/update-webhook)                    |
-| Toggle webhook | `toggle_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/toggle-webhook)                    |
-| Delete webhook | `delete_webhook(...)`      | [reference](https://www.helius.dev/docs/api-reference/webhooks/delete-webhook)                    |
+| REST operation | Python method         | Helius docs                                                                      |
+| -------------- | --------------------- | -------------------------------------------------------------------------------- |
+| Create webhook | `create_webhook(...)` | [reference](https://www.helius.dev/docs/api-reference/webhooks/create-webhook)   |
+| Get webhook    | `get_webhook(...)`    | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-webhook)      |
+| List webhooks  | `get_all_webhooks()`  | [reference](https://www.helius.dev/docs/api-reference/webhooks/get-all-webhooks) |
+| Update webhook | `update_webhook(...)` | [reference](https://www.helius.dev/docs/api-reference/webhooks/update-webhook)   |
+| Toggle webhook | `toggle_webhook(...)` | [reference](https://www.helius.dev/docs/api-reference/webhooks/toggle-webhook)   |
+| Delete webhook | `delete_webhook(...)` | [reference](https://www.helius.dev/docs/api-reference/webhooks/delete-webhook)   |
 
 ## Admin API
 
@@ -410,14 +411,16 @@ supports the context-manager protocol, a manual `close()`, and reads
 `HELIUS_API_KEY` from the environment or `.env`.
 
 ## AI
-AI was used to assist in the development of this project, which was started beacause I needed a Helius client written in Python myself for another project. It has eliminated the need to perform repetitive tasks, such as writing functions that are similar to those written by hand before them. It has also been useful in drafting and updating the documentation (exclusively README.md at the time of writing), writing tests and examples.
-That said, AI-generated code is reviewed in full, line-by-line by human(s) against the Helius API specifications.
+
+AI was used to assist in the development of this project, which was started because I needed a Helius client written in Python myself for another project. It has eliminated the need to perform repetitive tasks, such as writing functions that are similar to those written by hand before them. It has also been useful in drafting and updating the documentation (exclusively README.md at the time of writing), writing tests and examples.
+That said, AI-generated code is reviewed in full, line-by-line by me against the Helius API specifications.
 
 To roughly describe my approach to using AI in this project, I generally write the code by hand, which makes it easy to structure the code well and maintain an intuitive understanding of how the code works. Then, when I got to the part where I had to implement 100+ similar Python functions, I turned to AI to write the massive part of the codebase, while I reviewed the result at the same time.
 
 To sum up:
+
 - I generally structure and write a good part of what I'm programming by hand, including boilerplate.
-- I find it best to prompt agents to implement very limited functionality within narrow scope, performing something closer to pair-programming.
+- I find it best to prompt agents to implement very limited functionality within narrow a scope, performing something closer to pair-programming.
 - Even though at least half the LoC in this project are hand-typed, I find that AI is incredibly capable, can be enjoyable to use, but most importantly, using AI allows me to focus my time and energy on what matters.
 
 By the way, this README section is completely brain-made and hand-typed.
