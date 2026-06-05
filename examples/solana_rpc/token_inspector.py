@@ -7,11 +7,11 @@ Given a mint address, prints:
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/token_inspector.py <MINT_ADDRESS>
+    python examples/rpc/token_inspector.py <MINT_ADDRESS>
 
 Example with a small-holder-count mint:
 
-    python examples/solana_rpc/token_inspector.py J5iyNuTa6zqqA62Xe4h1VBvcBW5CTSNNva3QPh8DU5RV
+    python examples/rpc/token_inspector.py J5iyNuTa6zqqA62Xe4h1VBvcBW5CTSNNva3QPh8DU5RV
 
 Note:
     Very large mints may be rejected by `getTokenLargestAccounts` if the
@@ -28,7 +28,7 @@ import sys
 
 import httpx
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 
 def main() -> int:

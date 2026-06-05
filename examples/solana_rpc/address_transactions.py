@@ -6,8 +6,8 @@ either compact signature rows or full transaction payloads with pagination.
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/address_transactions.py <ADDRESS> [--limit 10]
-    python examples/solana_rpc/address_transactions.py <ADDRESS> --full --limit 5
+    python examples/rpc/address_transactions.py <ADDRESS> [--limit 10]
+    python examples/rpc/address_transactions.py <ADDRESS> --full --limit 5
 
 Docs:
     https://www.helius.dev/docs/getting-data/get-transactions-for-address
@@ -25,7 +25,7 @@ import sys
 
 import httpx
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 
 def format_time(block_time: int | None) -> str:

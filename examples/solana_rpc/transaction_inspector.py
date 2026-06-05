@@ -7,7 +7,7 @@ involved, and any log messages emitted by the on-chain programs.
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/transaction_inspector.py <SIGNATURE>
+    python examples/rpc/transaction_inspector.py <SIGNATURE>
 
 Uses (with `with`):
     get_transaction.
@@ -19,7 +19,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 

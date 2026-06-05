@@ -8,8 +8,8 @@ breakdown of successful vs. failed transactions plus total fees paid.
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/block_explorer.py
-    python examples/solana_rpc/block_explorer.py --slot 250000000
+    python examples/rpc/block_explorer.py
+    python examples/rpc/block_explorer.py --slot 250000000
 
 Uses (with `with`):
     get_slot, get_block.
@@ -21,7 +21,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 
@@ -73,9 +73,7 @@ def main() -> int:
     print(f"\nTransactions     : {total:,} total")
     print(f"  succeeded      : {succeeded:,}")
     print(f"  failed         : {failed:,}")
-    print(
-        f"Total fees       : {fees / LAMPORTS_PER_SOL:.9f} SOL " f"({fees:,} lamports)"
-    )
+    print(f"Total fees       : {fees / LAMPORTS_PER_SOL:.9f} SOL ({fees:,} lamports)")
 
     if block.rewards:
         print(f"\nRewards ({len(block.rewards)}):")

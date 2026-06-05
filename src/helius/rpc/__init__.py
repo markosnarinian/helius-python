@@ -1,5 +1,5 @@
-from helius.solana_rpc.client import SolanaRpcClient
-from helius.solana_rpc.models import (
+from helius.rpc.client import SolanaRpcClient
+from helius.rpc.models import (
     Account,
     Block,
     BlockCommitment,

@@ -7,7 +7,7 @@ polls `getSignatureStatuses` until the airdrop transaction reaches a
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/devnet_airdrop.py <WALLET_ADDRESS> [--sol 1.0]
+    python examples/rpc/devnet_airdrop.py <WALLET_ADDRESS> [--sol 1.0]
 
 Note:
     `requestAirdrop` is only available on Devnet and Testnet — never on
@@ -26,7 +26,7 @@ import time
 
 import httpx
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 DEVNET_URL = "https://devnet.helius-rpc.com"
@@ -67,7 +67,9 @@ def main() -> int:
     try:
         print(f"Requesting {args.sol} SOL airdrop to {args.address} on devnet...")
         try:
-            signature = client.request_airdrop(public_key=args.address, lamports=lamports)
+            signature = client.request_airdrop(
+                public_key=args.address, lamports=lamports
+            )
         except httpx.HTTPStatusError as exc:
             print(
                 f"HTTP {exc.response.status_code}: devnet airdrop request was rejected.",

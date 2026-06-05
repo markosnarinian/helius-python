@@ -22,7 +22,6 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parent
 PYTHONPATH = str(ROOT / "src")
 USE_COLOR = "NO_COLOR" not in os.environ
@@ -35,9 +34,7 @@ RESET = "\033[0m"
 
 SYSTEM_PROGRAM = "11111111111111111111111111111111"
 SMALL_MINT = "J5iyNuTa6zqqA62Xe4h1VBvcBW5CTSNNva3QPh8DU5RV"
-KNOWN_SIGNATURE = (
-    "eqRntqi1tjXv1zEGBM5btQGWoxWc73XXGDJXjxLE65Atj6T6qzNnJf5LyTbUoGXHS9TzeAnQniAre48SjcJft9f"
-)
+KNOWN_SIGNATURE = "eqRntqi1tjXv1zEGBM5btQGWoxWc73XXGDJXjxLE65Atj6T6qzNnJf5LyTbUoGXHS9TzeAnQniAre48SjcJft9f"
 DEVNET_ADDRESS = "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU"
 
 
@@ -51,9 +48,9 @@ class ExampleTest:
 
 TESTS = [
     ExampleTest(
-        name="solana_rpc/address_transactions",
+        name="rpc/address_transactions",
         args=[
-            "examples/solana_rpc/address_transactions.py",
+            "examples/rpc/address_transactions.py",
             SYSTEM_PROGRAM,
             "--limit",
             "1",
@@ -61,9 +58,9 @@ TESTS = [
         ],
     ),
     ExampleTest(
-        name="solana_rpc/address_transfers",
+        name="rpc/address_transfers",
         args=[
-            "examples/solana_rpc/address_transfers.py",
+            "examples/rpc/address_transfers.py",
             SYSTEM_PROGRAM,
             "--limit",
             "1",
@@ -71,14 +68,14 @@ TESTS = [
         ],
     ),
     ExampleTest(
-        name="solana_rpc/block_explorer",
-        args=["examples/solana_rpc/block_explorer.py", "--slot", "423563000"],
+        name="rpc/block_explorer",
+        args=["examples/rpc/block_explorer.py", "--slot", "423563000"],
         timeout=90,
     ),
     ExampleTest(
-        name="solana_rpc/devnet_airdrop",
+        name="rpc/devnet_airdrop",
         args=[
-            "examples/solana_rpc/devnet_airdrop.py",
+            "examples/rpc/devnet_airdrop.py",
             DEVNET_ADDRESS,
             "--sol",
             "0.000000001",
@@ -88,38 +85,42 @@ TESTS = [
         ],
     ),
     ExampleTest(
-        name="solana_rpc/network_status",
-        args=["examples/solana_rpc/network_status.py"],
+        name="rpc/network_status",
+        args=["examples/rpc/network_status.py"],
     ),
     ExampleTest(
-        name="solana_rpc/priority_fees",
-        args=["examples/solana_rpc/priority_fees.py"],
+        name="rpc/priority_fees",
+        args=["examples/rpc/priority_fees.py"],
     ),
     ExampleTest(
-        name="solana_rpc/stake_overview",
-        args=["examples/solana_rpc/stake_overview.py"],
+        name="rpc/stake_overview",
+        args=["examples/rpc/stake_overview.py"],
         timeout=120,
     ),
     ExampleTest(
-        name="solana_rpc/token_inspector",
-        args=["examples/solana_rpc/token_inspector.py", SMALL_MINT],
+        name="rpc/token_inspector",
+        args=["examples/rpc/token_inspector.py", SMALL_MINT],
         timeout=90,
     ),
     ExampleTest(
-        name="solana_rpc/transaction_inspector",
-        args=["examples/solana_rpc/transaction_inspector.py", KNOWN_SIGNATURE],
+        name="rpc/transaction_inspector",
+        args=["examples/rpc/transaction_inspector.py", KNOWN_SIGNATURE],
         timeout=90,
     ),
     ExampleTest(
-        name="solana_rpc/wallet_tracker",
-        args=["examples/solana_rpc/wallet_tracker.py", SYSTEM_PROGRAM, "--limit", "1"],
+        name="rpc/wallet_tracker",
+        args=["examples/rpc/wallet_tracker.py", SYSTEM_PROGRAM, "--limit", "1"],
         timeout=120,
     ),
     ExampleTest(
         name="laserstream/websocket_logs",
         args=["examples/laserstream/websocket_logs.py", "--count", "1"],
         timeout=45,
-        external_failure_markers=("TimeoutError: timed out", "403 Forbidden", "HTTP 403"),
+        external_failure_markers=(
+            "TimeoutError: timed out",
+            "403 Forbidden",
+            "HTTP 403",
+        ),
     ),
     ExampleTest(
         name="webhooks/webhook_crud",

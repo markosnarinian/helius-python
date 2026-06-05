@@ -12,8 +12,8 @@ sample only counts transactions that locked those accounts as writable
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/priority_fees.py
-    python examples/solana_rpc/priority_fees.py --account <PUBKEY> --account <PUBKEY>
+    python examples/rpc/priority_fees.py
+    python examples/rpc/priority_fees.py --account <PUBKEY> --account <PUBKEY>
 
 Uses (with `with`):
     get_recent_prioritization_fees.
@@ -25,7 +25,7 @@ import argparse
 import statistics
 import sys
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 
 def percentile(sorted_values: list[int], pct: float) -> int:

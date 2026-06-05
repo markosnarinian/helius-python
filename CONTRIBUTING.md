@@ -67,7 +67,7 @@ prior discussion; just send them.
 ## Codebase Conventions
 
 Please match the existing style of the codebase. Skim
-[`src/helius/solana_rpc.py`](src/helius/solana_rpc.py) and
+[`src/helius/rpc.py`](src/helius/rpc.py) and
 [`src/helius/models.py`](src/helius/models.py) before writing new code. In
 particular:
 

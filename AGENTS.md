@@ -76,7 +76,7 @@ Skeleton:
 import json
 import httpx
 import respx
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 @respx.mock
 def test_get_balance():

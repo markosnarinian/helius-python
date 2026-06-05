@@ -3,11 +3,11 @@
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/wallet_tracker.py <WALLET_ADDRESS> [--limit 20]
+    python examples/rpc/wallet_tracker.py <WALLET_ADDRESS> [--limit 20]
 
 Example (Helius's own treasury-ish address, replace with any):
 
-    python examples/solana_rpc/wallet_tracker.py 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
+    python examples/rpc/wallet_tracker.py 7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU
 
 It prints:
     - SOL balance (in SOL, not lamports)
@@ -23,7 +23,7 @@ import argparse
 import datetime as dt
 import sys
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 # SPL Token program ID — used to list every token account owned by a wallet.
 TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"

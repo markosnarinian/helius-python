@@ -7,7 +7,7 @@ validator set (top 10 by stake).
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/stake_overview.py
+    python examples/rpc/stake_overview.py
 
 Uses (with `try/finally`):
     get_inflation_rate, get_inflation_governor, get_supply,
@@ -20,7 +20,7 @@ import sys
 
 import httpx
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 LAMPORTS_PER_SOL = 1_000_000_000
 

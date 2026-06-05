@@ -1,4 +1,4 @@
-from helius.solana_rpc.models import (
+from helius.rpc.models import (
     Account,
     Block,
     BlockCommitment,

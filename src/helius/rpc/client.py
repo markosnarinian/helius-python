@@ -5,7 +5,7 @@ import httpx
 from dotenv import dotenv_values
 from pydantic import Field, TypeAdapter, validate_call
 
-from helius.solana_rpc.models import (
+from helius.rpc.models import (
     Account,
     Block,
     BlockCommitment,

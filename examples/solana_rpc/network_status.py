@@ -7,7 +7,7 @@ recent-performance summary (avg TPS over the last samples).
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/network_status.py
+    python examples/rpc/network_status.py
 
 Uses (with `with`):
     get_health, get_version, get_slot, get_block_height, get_epoch_info,
@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import sys
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 
 def main() -> int:

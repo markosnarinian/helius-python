@@ -6,8 +6,8 @@ Uses Helius's `getTransfersByAddress` RPC method exposed by this client as
 Usage:
 
     export HELIUS_API_KEY=your_helius_api_key
-    python examples/solana_rpc/address_transfers.py <ADDRESS> [--limit 20]
-    python examples/solana_rpc/address_transfers.py <ADDRESS> --direction in --mint <MINT>
+    python examples/rpc/address_transfers.py <ADDRESS> [--limit 20]
+    python examples/rpc/address_transfers.py <ADDRESS> --direction in --mint <MINT>
 
 Docs:
     https://www.helius.dev/docs/getting-data/get-transfers-by-address
@@ -25,7 +25,7 @@ import sys
 
 import httpx
 
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 
 def format_time(block_time: int) -> str:

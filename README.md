@@ -148,7 +148,7 @@ pip install helius-python
 Pass your Helius API key explicitly:
 
 ```python
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 ```
@@ -167,7 +167,7 @@ HELIUS_API_KEY=your_helius_api_key
 ```
 
 ```python
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 client = SolanaRpcClient()  # reads HELIUS_API_KEY from the environment or .env
 ```
@@ -177,7 +177,7 @@ client = SolanaRpcClient()  # reads HELIUS_API_KEY from the environment or .env
 ### As a context manager (recommended)
 
 ```python
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 with SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY") as client:
     _ctx, balance = client.get_balance("So11111111111111111111111111111111111111112")
@@ -197,7 +197,7 @@ If a `with` block doesn't fit your code structure (e.g. the client lives
 on a long-lived object), call `close()` yourself when you're done:
 
 ```python
-from helius.solana_rpc import SolanaRpcClient
+from helius.rpc import SolanaRpcClient
 
 client = SolanaRpcClient(api_key="YOUR_HELIUS_API_KEY")
 try:
@@ -245,7 +245,7 @@ The method names map 1:1 to the Solana JSON-RPC spec, just converted to
 ## Status
 
 Actively expanding toward full coverage of the Helius API. See
-[`src/helius/solana_rpc/client.py`](src/helius/solana_rpc/client.py) for the
+[`src/helius/rpc/client.py`](src/helius/rpc/client.py) for the
 current Solana JSON-RPC implementation; supported surfaces are listed below,
 and missing endpoints are tracked as issues and added continuously.
 
