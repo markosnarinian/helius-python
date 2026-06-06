@@ -1,6 +1,6 @@
 import json
 from os import environ
-from typing import Annotated, Literal
+from typing import Annotated, Iterator, Literal, TypeAlias
 
 import httpx
 from dotenv import dotenv_values
@@ -12,17 +12,17 @@ from websockets.sync.client import connect
 from helius.utils import JsonRpcRequest
 
 
-class Notification(BaseModel):
+class BaseNotification(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
 
-class TransactionNotification(Notification):
+class TransactionNotification(BaseNotification):
     transaction: dict
     signature: str
     slot: int
 
 
-class AccountNotification(Notification):
+class AccountNotification(BaseNotification):
     lamports: int
     owner: str
     data: list | dict | str
@@ -31,24 +31,24 @@ class AccountNotification(Notification):
     space: int | None = None
 
 
-class BlockNotification(Notification):
+class BlockNotification(BaseNotification):
     slot: int
     err: dict | None
     block: dict | None
 
 
-class LogsNotification(Notification):
+class LogsNotification(BaseNotification):
     signature: str
     err: dict | str | None
     logs: list[str]
 
 
-class ProgramNotification(Notification):
+class ProgramNotification(BaseNotification):
     pubkey: str
     account: AccountNotification
 
 
-class RootNotification(Notification):
+class RootNotification(BaseNotification):
     root: int
 
     @model_validator(mode="before")
@@ -59,7 +59,7 @@ class RootNotification(Notification):
         return data
 
 
-class SignatureNotification(Notification):
+class SignatureNotification(BaseNotification):
     value: dict[str, None | str]
 
     @model_validator(mode="before")
@@ -68,13 +68,13 @@ class SignatureNotification(Notification):
         return {"value": data}
 
 
-class SlotNotification(Notification):
+class SlotNotification(BaseNotification):
     parent: int
     root: int
     slot: int
 
 
-class SlotsUpdatesNotification(Notification):
+class SlotsUpdatesNotification(BaseNotification):
     err: str | None = None
     parent: int | None = None
     slot: int
@@ -91,12 +91,26 @@ class SlotsUpdatesNotification(Notification):
     ]
 
 
-class VoteNotification(Notification):
+class VoteNotification(BaseNotification):
     hash: str
     slots: list[int]
     timestamp: int | None
     signature: str
     vote_pubkey: str
+
+
+Notification: TypeAlias = (
+    TransactionNotification
+    | AccountNotification
+    | BlockNotification
+    | LogsNotification
+    | ProgramNotification
+    | RootNotification
+    | SignatureNotification
+    | SlotNotification
+    | SlotsUpdatesNotification
+    | VoteNotification
+)
 
 
 class WebSocketClient:
@@ -190,7 +204,7 @@ class WebSocketClient:
             notification = model.model_validate(result)
         return context, notification, subscription
 
-    def listen(self):
+    def listen(self) -> Iterator[tuple[dict | None, Notification, int]]:
         while True:
             context, notification, subscription = self.receive()
             yield context, notification, subscription
