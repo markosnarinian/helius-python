@@ -132,6 +132,10 @@ class WebSocketClient:
         base_url="wss://mainnet.helius-rpc.com",
         api_key: str | None = None,
         proxy: str | None = None,
+        open_timeout: float | None = 10,
+        ping_interval: float | None = 20,
+        ping_timeout: float | None = 20,
+        close_timeout: float | None = 10,
     ):
 
         base_url = base_url
@@ -144,7 +148,14 @@ class WebSocketClient:
         if not api_key:
             raise ValueError("No API key provided.")
         uri = httpx.URL(base_url).copy_with(path="/", params={"api-key": api_key})
-        self._websocket = connect(str(uri), proxy=proxy)
+        self._websocket = connect(
+            str(uri),
+            proxy=proxy,
+            open_timeout=open_timeout,
+            ping_interval=ping_interval,
+            ping_timeout=ping_timeout,
+            close_timeout=close_timeout,
+        )
 
     def close(self):
         self._websocket.close()
