@@ -119,12 +119,6 @@ delete
 
 Deprecated Helius APIs are not supported.
 
-**Current status:** the standard Solana JSON-RPC surface, the
-WebSocket subscription surface, the Webhooks API, and the Admin
-(account management) usage endpoint are implemented today. Support for
-Helius RPC extensions and the remaining REST endpoints is actively
-being worked on.
-
 ## Goals
 
 1. **Completeness** — 1:1 coverage of the entire Helius API surface.
