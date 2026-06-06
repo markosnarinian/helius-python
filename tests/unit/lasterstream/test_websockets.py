@@ -64,9 +64,20 @@ def fake_ws(monkeypatch):
     """Patch `connect` so `WebSocketClient.__init__` returns a FakeWebSocket."""
     fake = FakeWebSocket()
 
-    def fake_connect(uri, proxy=None):
+    def fake_connect(
+        uri,
+        proxy=None,
+        open_timeout=None,
+        ping_interval=None,
+        ping_timeout=None,
+        close_timeout=None,
+    ):
         fake.uri = uri
         fake.proxy = proxy
+        fake.open_timeout = open_timeout
+        fake.ping_interval = ping_interval
+        fake.ping_timeout = ping_timeout
+        fake.close_timeout = close_timeout
         return fake
 
     monkeypatch.setattr(ws_module, "connect", fake_connect)
@@ -283,13 +294,29 @@ def test_init_picks_up_api_key_from_env(monkeypatch):
     monkeypatch.setenv("HELIUS_API_KEY", "from-env")
     monkeypatch.setattr(ws_module, "dotenv_values", lambda: {})
 
-    def fake_connect(uri, proxy=None):
+    def fake_connect(
+        uri,
+        proxy=None,
+        open_timeout=None,
+        ping_interval=None,
+        ping_timeout=None,
+        close_timeout=None,
+    ):
         fake.uri = uri
+        fake.proxy = proxy
+        fake.open_timeout = open_timeout
+        fake.ping_interval = ping_interval
+        fake.ping_timeout = ping_timeout
+        fake.close_timeout = close_timeout
         return fake
 
     monkeypatch.setattr(ws_module, "connect", fake_connect)
     client = WebSocketClient()
     assert "api-key=from-env" in fake.uri
+    assert fake.open_timeout == 10
+    assert fake.ping_interval == 20
+    assert fake.ping_timeout == 20
+    assert fake.close_timeout == 10
     assert client._websocket is fake
 
 
@@ -297,29 +324,67 @@ def test_init_builds_uri_with_api_key_and_passes_proxy(monkeypatch):
     fake = FakeWebSocket()
     captured = {}
 
-    def fake_connect(uri, proxy=None):
+    def fake_connect(
+        uri,
+        proxy=None,
+        open_timeout=None,
+        ping_interval=None,
+        ping_timeout=None,
+        close_timeout=None,
+    ):
         captured["uri"] = uri
         captured["proxy"] = proxy
+        captured["open_timeout"] = open_timeout
+        captured["ping_interval"] = ping_interval
+        captured["ping_timeout"] = ping_timeout
+        captured["close_timeout"] = close_timeout
         return fake
 
     monkeypatch.setattr(ws_module, "connect", fake_connect)
-    WebSocketClient(api_key="test", proxy="http://proxy:8080")
+    WebSocketClient(
+        api_key="test",
+        proxy="http://proxy:8080",
+        open_timeout=1,
+        ping_interval=2,
+        ping_timeout=3,
+        close_timeout=4,
+    )
     assert "api-key=test" in captured["uri"]
     assert captured["uri"].startswith("wss://mainnet.helius-rpc.com")
     assert captured["proxy"] == "http://proxy:8080"
+    assert captured["open_timeout"] == 1
+    assert captured["ping_interval"] == 2
+    assert captured["ping_timeout"] == 3
+    assert captured["close_timeout"] == 4
 
 
 def test_init_uses_custom_base_url(monkeypatch):
     fake = FakeWebSocket()
     captured = {}
 
-    def fake_connect(uri, proxy=None):
+    def fake_connect(
+        uri,
+        proxy=None,
+        open_timeout=None,
+        ping_interval=None,
+        ping_timeout=None,
+        close_timeout=None,
+    ):
         captured["uri"] = uri
+        captured["proxy"] = proxy
+        captured["open_timeout"] = open_timeout
+        captured["ping_interval"] = ping_interval
+        captured["ping_timeout"] = ping_timeout
+        captured["close_timeout"] = close_timeout
         return fake
 
     monkeypatch.setattr(ws_module, "connect", fake_connect)
     WebSocketClient(api_key="test", base_url="wss://devnet.helius-rpc.com")
     assert captured["uri"].startswith("wss://devnet.helius-rpc.com")
+    assert captured["open_timeout"] == 10
+    assert captured["ping_interval"] == 20
+    assert captured["ping_timeout"] == 20
+    assert captured["close_timeout"] == 10
 
 
 def test_close_delegates_to_websocket(client, fake_ws):
