@@ -5,3 +5,4 @@
 - Improve camelCase <-> snake_case in typing
 - Handle HTTP response codes and idiomatic error messages in responses
 - Catch websocket notification errors
+- Allow required arguments as positional
