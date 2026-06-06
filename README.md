@@ -105,23 +105,19 @@ The goal of this library is to **support every function, method, endpoint,
 and feature that Helius exposes.** If Helius ships it, this client
 wraps it.
 
-- ✅ **The full Solana JSON-RPC surface** proxied by Helius —
-  `getAccountInfo`, `getBalance`, `getBlock`, `getTransaction`,
-  `getProgramAccounts`, `getTokenAccountsByOwner`,
-  `getSignaturesForAddress`, and every other standard RPC method.
-  **(supported today)**
-- 🚧 **All Helius-specific RPC extensions** — enhanced transactions, DAS
-  (Digital Asset Standard) methods, priority fee estimation, and the
-  rest of the Helius-only RPC namespace. **(in progress)**
-- ✅ **Webhooks API** — create, fetch, update, enable/disable, and delete
-  Helius webhooks. **(supported today)**
-- 🚧 **Remaining Helius REST endpoints** — Enhanced Transactions API,
-  Mint API, token metadata, address lookups, and beyond. **(in progress)**
-- 🚧 **Platform features** — streaming, websockets, and any new
-  capability Helius adds to its API. The full WebSocket subscription
-  surface (`accountSubscribe`, `transactionSubscribe`, `logsSubscribe`,
-  `programSubscribe`, and the rest) is **supported today**; other
-  platform features are **in progress**.
+- ✅ **Solana JSON-RPC methods**
+- 🚧 **Enhanced Transactions**
+- ✅ **Webhooks API**
+- ✅ **Laserstream (Websockets)**
+- 🚧 **Laserstream (gRPC)**
+- 🚧 **DAS (Digital Asset Standard)**
+- 🚧 **Priority Fee**
+delete
+- 🚧 **Wallet API**
+- 🚧 **ZK Compression**
+- ✅ **Account administration APIs**
+
+Deprecated Helius APIs are not supported.
 
 **Current status:** the standard Solana JSON-RPC surface, the
 WebSocket subscription surface, the Webhooks API, and the Admin
