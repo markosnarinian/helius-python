@@ -112,7 +112,6 @@ wraps it.
 - 🚧 **Laserstream (gRPC)**
 - 🚧 **DAS (Digital Asset Standard)**
 - 🚧 **Priority Fee**
-delete
 - 🚧 **Wallet API**
 - 🚧 **ZK Compression**
 - ✅ **Account administration APIs**
