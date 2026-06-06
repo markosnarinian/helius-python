@@ -163,6 +163,27 @@ class WebSocketClient:
         response = self._websocket.recv()
         return json.loads(response)
 
+    def receive(self) -> tuple[dict | None, Notification, int]:
+        response = json.loads(self._websocket.recv())
+        model = self.MODELS[response["method"]]
+        result = response["params"]["result"]
+        subscription = response["params"]["subscription"]
+        if isinstance(result, dict):
+            context = result.get("context")
+            value = result.get("value")
+        else:
+            context, value = None, None
+        if value is not None:
+            notification = model.model_validate(value)
+        else:
+            notification = model.model_validate(result)
+        return context, notification, subscription
+
+    def listen(self):
+        while True:
+            context, notification, subscription = self.receive()
+            yield context, notification, subscription
+
     def _unsubscribe(self, subscription_type, subscription) -> bool:
         request = (
             JsonRpcRequest(method=f"{subscription_type}Unsubscribe")
@@ -376,24 +397,3 @@ class WebSocketClient:
 
     def vote_unsubscribe(self, subscription) -> bool:
         return self._unsubscribe("vote", subscription)
-
-    def receive(self) -> tuple[dict | None, Notification, int]:
-        response = json.loads(self._websocket.recv())
-        model = self.MODELS[response["method"]]
-        result = response["params"]["result"]
-        subscription = response["params"]["subscription"]
-        if isinstance(result, dict):
-            context = result.get("context")
-            value = result.get("value")
-        else:
-            context, value = None, None
-        if value is not None:
-            notification = model.model_validate(value)
-        else:
-            notification = model.model_validate(result)
-        return context, notification, subscription
-
-    def listen(self):
-        while True:
-            context, notification, subscription = self.receive()
-            yield context, notification, subscription
