@@ -213,14 +213,13 @@ class WebSocketClient:
             context, notification, subscription = self.receive()
             yield context, notification, subscription
 
-    def _unsubscribe(self, subscription_type, subscription) -> bool:
+    def _unsubscribe(self, subscription_type, subscription) -> None:
         request = (
             JsonRpcRequest(method=f"{subscription_type}Unsubscribe")
             .add(subscription)
             .build()
         )
-        response = self._send(request)
-        return response["result"]
+        self._send(request)
 
     def transaction_subscribe(
         self,
