@@ -45,17 +45,17 @@ class ProjectUsage(BaseModel):
     usage: Usage
 
 
-class AccountManagementClient:
+class AdminClient:
     def __init__(
         self,
         *,
-        base_url: str = "https://admin-api.helius.xyz/v0/admin/projects/{id}/usage",
+        url: str = "https://admin-api.helius.xyz/v0/admin/projects/{id}/usage",
         api_key: str | None = None,
         project_id: str | None = None,
         headers: dict[str, str] | None = None,
         proxy: str | None = None,
     ) -> None:
-        base_url = base_url
+        self.url = url
         api_key = (
             api_key
             or environ.get("HELIUS_API_KEY")
@@ -64,7 +64,7 @@ class AccountManagementClient:
         )
         self.project_id = project_id
         client_options: dict = {
-            "base_url": base_url,
+            "base_url": url,
             "headers": headers,
             "proxy": proxy,
         }
@@ -86,10 +86,9 @@ class AccountManagementClient:
 
     def get_project_usage(self, project_id: str | None = None) -> ProjectUsage:
         project_id = project_id or self.project_id or None
+        url = self.url.format(id=project_id)
         if project_id is None:
             raise ValueError("No project ID provided.")
-        response = self._client.request(
-            method="GET", url="/", params={"id": project_id}
-        )
+        response = self._client.request(method="GET", url=url)
         response.raise_for_status()
         return ProjectUsage.model_validate(response.json())

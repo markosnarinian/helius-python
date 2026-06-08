@@ -1,5 +1,5 @@
 from helius.admin.admin import (
-    AccountManagementClient,
+    AdminClient,
     BillingCycle,
     ProjectUsage,
     SubscriptionDetails,
@@ -7,7 +7,7 @@ from helius.admin.admin import (
 )
 
 __all__ = [
-    "AccountManagementClient",
+    "AdminClient",
     "BillingCycle",
     "ProjectUsage",
     "SubscriptionDetails",
