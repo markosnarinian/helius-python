@@ -108,7 +108,7 @@ wraps it.
 - ✅ **Solana JSON-RPC methods**
 - 🚧 **Enhanced Transactions**
 - ✅ **Webhooks API**
-- ✅ **Laserstream (Websockets)**
+- ✅ **Laserstream (websockets)**
 - 🚧 **Laserstream (gRPC)**
 - 🚧 **DAS (Digital Asset Standard)**
 - 🚧 **Priority Fee**
