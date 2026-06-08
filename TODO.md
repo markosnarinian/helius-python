@@ -6,3 +6,4 @@
 - Handle HTTP response codes and idiomatic error messages in responses
 - Catch websocket notification errors
 - Allow required arguments as positional
+- Unsubscribe methods return next frame which is not necessarily the frame that contains the unsubscribe response
