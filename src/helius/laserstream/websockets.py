@@ -397,32 +397,32 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
-    def transaction_unsubscribe(self, subscription) -> bool:
+    def transaction_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("transaction", subscription)
 
-    def account_unsubscribe(self, subscription) -> bool:
+    def account_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("account", subscription)
 
-    def block_unsubscribe(self, subscription) -> bool:
+    def block_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("block", subscription)
 
-    def logs_unsubscribe(self, subscription) -> bool:
+    def logs_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("logs", subscription)
 
-    def program_unsubscribe(self, subscription) -> bool:
+    def program_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("program", subscription)
 
-    def root_unsubscribe(self, subscription) -> bool:
+    def root_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("root", subscription)
 
-    def signature_unsubscribe(self, subscription) -> bool:
+    def signature_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("signature", subscription)
 
-    def slot_unsubscribe(self, subscription) -> bool:
+    def slot_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("slot", subscription)
 
-    def slots_updates_unsubscribe(self, subscription) -> bool:
+    def slots_updates_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("slotsUpdates", subscription)
 
-    def vote_unsubscribe(self, subscription) -> bool:
+    def vote_unsubscribe(self, subscription: int) -> bool:
         return self._unsubscribe("vote", subscription)
