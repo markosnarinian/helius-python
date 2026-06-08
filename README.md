@@ -381,14 +381,14 @@ from the environment or `.env` when `api_key` is omitted; optional
 
 ## Admin API
 
-`AccountManagementClient` wraps the Helius admin API. Today it exposes
+`AdminClient` wraps the Helius admin API. Today it exposes
 project credit usage via `get_project_usage(...)`, which returns a typed
 `ProjectUsage` model.
 
 ```python
-from helius.admin.admin import AccountManagementClient
+from helius.admin.admin import AdminClient
 
-with AccountManagementClient(api_key="YOUR_HELIUS_API_KEY") as admin:
+with AdminClient(api_key="YOUR_HELIUS_API_KEY") as admin:
     usage = admin.get_project_usage(project_id="YOUR_PROJECT_ID")
     print(usage.credits_remaining, usage.usage.rpc)
 ```
