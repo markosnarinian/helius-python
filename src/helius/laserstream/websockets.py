@@ -182,7 +182,11 @@ class WebSocketClient:
 
     def _send(self, request) -> dict:
         self._websocket.send(json.dumps(request))
-        return json.loads(self._websocket.recv())
+        response = json.loads(self._websocket.recv())
+        if "error" in response:
+            error = response["error"]
+            raise Exception(error)
+        return response
 
     def _recv(self):
         response = self._websocket.recv()
