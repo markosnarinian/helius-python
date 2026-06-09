@@ -172,7 +172,8 @@ class WebSocketClient:
         )
 
     def close(self):
-        self._websocket.close()
+        if hasattr(self, "_client"):
+            self._websocket.close()
 
     def __enter__(self):
         return self
@@ -198,14 +199,15 @@ class WebSocketClient:
         result = response["params"]["result"]
         subscription = response["params"]["subscription"]
         context = result["context"]
-        value = result["value"]
-        if value is not None:
-            notification = model.model_validate(value)
-        else:
+        if result is int:
             notification = model.model_validate(result)
+        elif isinstance(result, dict):
+            notification = model.model_validate(result["value"])
+        else:
+            raise Exception("Received unexpected response.")
         return context, notification, subscription
 
-    def listen(self) -> Iterator[tuple[dict | None, Notification, int]]:
+    def listen(self) -> Iterator[tuple[dict, Notification, int]]:
         while True:
             context, notification, subscription = self.receive()
             yield context, notification, subscription
