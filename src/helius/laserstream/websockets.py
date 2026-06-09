@@ -172,7 +172,7 @@ class WebSocketClient:
         )
 
     def close(self):
-        if hasattr(self, "_client"):
+        if hasattr(self, "_websocket"):
             self._websocket.close()
 
     def __enter__(self):
