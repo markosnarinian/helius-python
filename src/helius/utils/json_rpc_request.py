@@ -42,4 +42,4 @@ class JsonRpcRequest:
         }
         if params:
             request.update({"params": params})
-        return json.dumps(request)
+        return request
