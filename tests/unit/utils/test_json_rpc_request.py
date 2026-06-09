@@ -9,9 +9,9 @@ def test_add_skips_none_unless_allowed():
 
 
 def test_set_skips_none_unless_allowed():
-    assert (
-        JsonRpcRequest(method="test").set("commitment", None).build()["params"] is None
-    )
+    assert "params" not in JsonRpcRequest(method="test").set(
+        "commitment", None
+    ).build()
     assert JsonRpcRequest(method="test").set(
         "commitment", None, can_be_none=True
     ).build()["params"] == [{"commitment": None}]
@@ -39,7 +39,7 @@ def test_config_dict_only_appended_when_non_empty():
 def test_params_omitted_when_no_positional_or_config_values():
     payload = JsonRpcRequest(method="test").build()
 
-    assert payload["params"] is None
+    assert "params" not in payload
 
 
 def test_method_id_and_jsonrpc_are_included():

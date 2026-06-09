@@ -193,21 +193,20 @@ class WebSocketClient:
         response = self._websocket.recv()
         return json.loads(response)
 
-    def receive(self) -> tuple[dict, Notification, int]:
+    def receive(self) -> tuple[dict | None, Notification, int]:
         response = json.loads(self._websocket.recv())
         model = self.MODELS[response["method"]]
         result = response["params"]["result"]
         subscription = response["params"]["subscription"]
-        context = result["context"]
-        if result is int:
-            notification = model.model_validate(result)
-        elif isinstance(result, dict):
+        if isinstance(result, dict):
             notification = model.model_validate(result["value"])
+            context = result["context"] if "context" in result else None
         else:
-            raise Exception("Received unexpected response.")
+            notification = model.model_validate(result)
+            context = None
         return context, notification, subscription
 
-    def listen(self) -> Iterator[tuple[dict, Notification, int]]:
+    def listen(self) -> Iterator[tuple[dict | None, Notification, int]]:
         while True:
             context, notification, subscription = self.receive()
             yield context, notification, subscription

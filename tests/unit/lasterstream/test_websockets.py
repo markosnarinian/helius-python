@@ -666,7 +666,7 @@ def test_unsubscribe_sends_correct_method_and_subscription(
 ):
     queue(fake_ws, {"jsonrpc": "2.0", "result": True, "id": 1})
     method = getattr(client, method_name)
-    assert method(4743323479349712) is True
+    assert method(4743323479349712) is None
     body = last_sent(fake_ws)
     assert body["method"] == upstream_method
     assert body["params"] == [4743323479349712]
@@ -692,15 +692,20 @@ def test_receive_transaction_notification(client, fake_ws):
         notification(
             "transactionNotification",
             {
-                "transaction": {"transaction": ["...", "base64"], "meta": {"fee": 5000}},
-                "signature": "5moMXe6VW7L7aQZskcAkKGQ1y19qqUT1teQKB",
-                "slot": 224341380,
+                "value": {
+                    "transaction": {
+                        "transaction": ["...", "base64"],
+                        "meta": {"fee": 5000},
+                    },
+                    "signature": "5moMXe6VW7L7aQZskcAkKGQ1y19qqUT1teQKB",
+                    "slot": 224341380,
+                },
             },
             4743323479349712,
         ),
     )
     context, note, subscription = client.receive()
-    assert context is None  # transactionNotification result is unwrapped
+    assert context is None
     assert isinstance(note, TransactionNotification)
     assert note.signature.startswith("5moMXe")
     assert note.slot == 224341380
@@ -845,7 +850,7 @@ def test_receive_slot_notification(client, fake_ws):
     queue(
         fake_ws,
         notification(
-            "slotNotification", {"parent": 75, "root": 44, "slot": 76}, 0
+            "slotNotification", {"value": {"parent": 75, "root": 44, "slot": 76}}, 0
         ),
     )
     context, note, subscription = client.receive()
@@ -860,10 +865,12 @@ def test_receive_slots_updates_notification(client, fake_ws):
         notification(
             "slotsUpdatesNotification",
             {
-                "parent": 75,
-                "slot": 76,
-                "timestamp": 1625081266243,
-                "type": "optimisticConfirmation",
+                "value": {
+                    "parent": 75,
+                    "slot": 76,
+                    "timestamp": 1625081266243,
+                    "type": "optimisticConfirmation",
+                },
             },
             0,
         ),
@@ -880,11 +887,13 @@ def test_receive_vote_notification(client, fake_ws):
         notification(
             "voteNotification",
             {
-                "hash": "8Rshv2oMkPu5E4opXTRyuyBeZBqQ4S477VG26wUTFxUM",
-                "slots": [1, 2],
-                "timestamp": None,
-                "signature": "sig",
-                "votePubkey": "Vote111",
+                "value": {
+                    "hash": "8Rshv2oMkPu5E4opXTRyuyBeZBqQ4S477VG26wUTFxUM",
+                    "slots": [1, 2],
+                    "timestamp": None,
+                    "signature": "sig",
+                    "votePubkey": "Vote111",
+                },
             },
             0,
         ),
