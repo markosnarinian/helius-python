@@ -192,7 +192,7 @@ class WebSocketClient:
         response = self._websocket.recv()
         return json.loads(response)
 
-    def receive(self) -> tuple[dict | None, Notification, int]:
+    def receive(self) -> tuple[dict, Notification, int]:
         response = json.loads(self._websocket.recv())
         model = self.MODELS[response["method"]]
         result = response["params"]["result"]
@@ -322,7 +322,7 @@ class WebSocketClient:
         *,
         filter: Literal["all", "allWithVotes"] | MentionsFilter,
         commitment: Literal["finalized", "confirmed", "processed"] | None = None,
-    ):
+    ) -> int:
         request = (
             JsonRpcRequest(method="logsSubscribe")
             .add(filter)
