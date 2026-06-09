@@ -197,11 +197,8 @@ class WebSocketClient:
         model = self.MODELS[response["method"]]
         result = response["params"]["result"]
         subscription = response["params"]["subscription"]
-        if isinstance(result, dict):
-            context = result.get("context")
-            value = result.get("value")
-        else:
-            context, value = None, None
+        context = result["context"]
+        value = result["value"]
         if value is not None:
             notification = model.model_validate(value)
         else:
@@ -396,32 +393,32 @@ class WebSocketClient:
         subscription = response["result"]
         return subscription
 
-    def transaction_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("transaction", subscription)
+    def transaction_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("transaction", subscription)
 
-    def account_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("account", subscription)
+    def account_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("account", subscription)
 
-    def block_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("block", subscription)
+    def block_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("block", subscription)
 
-    def logs_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("logs", subscription)
+    def logs_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("logs", subscription)
 
-    def program_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("program", subscription)
+    def program_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("program", subscription)
 
-    def root_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("root", subscription)
+    def root_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("root", subscription)
 
-    def signature_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("signature", subscription)
+    def signature_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("signature", subscription)
 
-    def slot_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("slot", subscription)
+    def slot_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("slot", subscription)
 
-    def slots_updates_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("slotsUpdates", subscription)
+    def slots_updates_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("slotsUpdates", subscription)
 
-    def vote_unsubscribe(self, subscription: int) -> bool:
-        return self._unsubscribe("vote", subscription)
+    def vote_unsubscribe(self, subscription: int) -> None:
+        self._unsubscribe("vote", subscription)
