@@ -717,6 +717,6 @@ class WebhooksApiClient:
         webhook = Webhook.model_validate(response)
         return webhook
 
-    def delete_webhook(self, webhook_id: str) -> dict:
+    def delete_webhook(self, webhook_id: str) -> str:
         response = self._send(f"/{webhook_id}", method="DELETE")
         return response["message"]
