@@ -1,15 +1,8 @@
+import json
 from typing import Any
-
-from pydantic import BaseModel
 
 
 class JsonRpcRequest:
-    class Request(BaseModel):
-        jsonrpc: str
-        method: str
-        params: list[Any] | None = None
-        id: str | int | None
-
     def __init__(
         self,
         *,
@@ -49,4 +42,4 @@ class JsonRpcRequest:
         }
         if params:
             request.update({"params": params})
-        return self.Request(**request).model_dump()
+        return json.dumps(request)
