@@ -39,7 +39,7 @@ class BlockNotification(BaseNotification):
 
 class LogsNotification(BaseNotification):
     signature: str
-    err: dict | str | None
+    err: dict | None
     logs: list[str]
 
 
