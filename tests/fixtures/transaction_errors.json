@@ -1,0 +1,52 @@
+{
+  "getSignatureStatuses": {
+    "jsonrpc": "2.0", "id": 1,
+    "result": {
+      "context": {"apiVersion": "3.1.8", "slot": 82},
+      "value": [
+        {"slot": 48, "confirmations": null, "err": null, "status": {"Ok": null}, "confirmationStatus": "finalized"},
+        null
+      ]
+    }
+  },
+  "getSignaturesForAddress": {
+    "jsonrpc": "2.0", "id": 1,
+    "result": [{
+      "signature": "5h6xBEauJ3PK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv",
+      "slot": 1054, "err": null, "memo": null,
+      "blockTime": 1641038400, "confirmationStatus": "finalized"
+    }]
+  },
+  "getTransaction": {
+    "jsonrpc": "2.0", "id": 1,
+    "result": {
+      "slot": 1054, "blockTime": 1641038400,
+      "meta": {
+        "err": null, "fee": 5000,
+        "preBalances": [1000000, 1], "postBalances": [995000, 1],
+        "preTokenBalances": [], "postTokenBalances": [],
+        "innerInstructions": [], "logMessages": [], "rewards": [], "status": {"Ok": null}
+      },
+      "transaction": {
+        "signatures": ["5h6xBEauJ3PK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv"],
+        "message": {
+          "accountKeys": ["Vote111111111111111111111111111111111111111", "11111111111111111111111111111111"],
+          "header": {"numRequiredSignatures": 1, "numReadonlySignedAccounts": 0, "numReadonlyUnsignedAccounts": 1},
+          "instructions": [], "recentBlockhash": "11111111111111111111111111111111"
+        }
+      },
+      "version": "legacy"
+    }
+  },
+  "getTransactionsForAddress": {
+    "jsonrpc": "2.0", "id": "1",
+    "result": {
+      "data": [{
+        "signature": "5h6xBEauJ3PK6SWCZ1PGjBvj8vDdWG3KpwATGy1ARAXFSDwt8GFXM7W5Ncn16wmqokgpiKRLuS83KUxyZyv2sUYv",
+        "slot": 1054, "transactionIndex": 42, "err": null, "memo": null,
+        "blockTime": 1641038400, "confirmationStatus": "finalized"
+      }],
+      "paginationToken": "1055:5"
+    }
+  }
+}

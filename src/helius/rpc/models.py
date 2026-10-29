@@ -136,7 +136,7 @@ class SignatureStatus(BaseModel):
 
     slot: int
     confirmations: int | None
-    err: dict | None
+    err: str | dict | None
     confirmation_status: str | None
 
 
@@ -145,7 +145,7 @@ class TransactionSignature(BaseModel):
 
     signature: str
     slot: int
-    err: dict | None
+    err: str | dict | None
     memo: str | None
     block_time: int | None
     confirmation_status: str | None
@@ -204,7 +204,7 @@ class VotingAccount(BaseModel):
 class TransactionMetadata(BaseModel):
     model_config = ConfigDict(alias_generator=AliasGenerator(validation_alias=to_camel))
 
-    err: dict | None
+    err: str | dict | None
     fee: int
     pre_balances: list[int]
     post_balances: list[int]
@@ -303,7 +303,7 @@ class TransactionSignaturesDetail(BaseModel):
     signature: str
     slot: int
     transaction_index: int
-    err: dict | None
+    err: str | dict | None
     memo: str | None
     block_time: int | None
     confirmation_status: Literal["finalized", "confirmed"] | None
